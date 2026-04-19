@@ -1,0 +1,855 @@
+{
+  "title": "Storybook Codex - Story Outcomes",
+  "generatedAt": "2026-04-19T22:30:30.096097+00:00",
+  "componentCount": 6,
+  "components": [
+    {
+      "name": "Button",
+      "framework": "react",
+      "componentPath": "fixtures/basic-button/Button.tsx",
+      "componentSource": "import type { ReactNode } from 'react';\n\nexport type ButtonProps = {\n  children: ReactNode;\n  size?: 'sm' | 'md' | 'lg';\n  tone?: 'neutral' | 'brand' | 'danger';\n  disabled?: boolean;\n  loading?: boolean;\n  onClick?: () => void;\n};\n\nexport function Button({\n  children,\n  size = 'md',\n  tone = 'neutral',\n  disabled = false,\n  loading = false,\n  onClick,\n}: ButtonProps) {\n  const label = loading ? 'Working...' : children;\n\n  return (\n    <button\n      data-size={size}\n      data-tone={tone}\n      disabled={disabled || loading}\n      onClick={onClick}\n      type=\"button\"\n    >\n      {label}\n    </button>\n  );\n}\n\n",
+      "storyPath": "fixtures/basic-button/Button.expected.stories.tsx",
+      "storySource": "import type { Meta, StoryObj } from '@storybook/react';\nimport { fn } from '@storybook/test';\n\nimport { Button } from './Button';\n\nconst meta = {\n  title: 'Fixtures/Button',\n  component: Button,\n  tags: ['autodocs'],\n  args: {\n    children: 'Save changes',\n    size: 'md',\n    tone: 'neutral',\n    onClick: fn(),\n  },\n  argTypes: {\n    size: {\n      control: 'radio',\n      options: ['sm', 'md', 'lg'],\n    },\n    tone: {\n      control: 'inline-radio',\n      options: ['neutral', 'brand', 'danger'],\n    },\n    onClick: {\n      control: false,\n    },\n  },\n} satisfies Meta<typeof Button>;\n\nexport default meta;\ntype Story = StoryObj<typeof meta>;\n\nexport const Default: Story = {};\n\nexport const Brand: Story = {\n  args: {\n    tone: 'brand',\n  },\n};\n\nexport const Disabled: Story = {\n  args: {\n    disabled: true,\n  },\n};\n\nexport const Loading: Story = {\n  args: {\n    loading: true,\n  },\n};\n\nexport const Large: Story = {\n  args: {\n    size: 'lg',\n  },\n};\n\n",
+      "metaArgs": {
+        "children": "Save changes",
+        "size": "md",
+        "tone": "neutral",
+        "onClick": {
+          "__event__": true
+        }
+      },
+      "stories": [
+        {
+          "name": "Default",
+          "args": {}
+        },
+        {
+          "name": "Brand",
+          "args": {
+            "tone": "brand"
+          }
+        },
+        {
+          "name": "Disabled",
+          "args": {
+            "disabled": true
+          }
+        },
+        {
+          "name": "Loading",
+          "args": {
+            "loading": true
+          }
+        },
+        {
+          "name": "Large",
+          "args": {
+            "size": "lg"
+          }
+        }
+      ],
+      "blueprintJson": {
+        "component": "Button",
+        "componentPath": "C:\\Users\\gamin\\storybook-codex\\fixtures\\basic-button\\Button.tsx",
+        "framework": "react",
+        "props": [
+          {
+            "name": "children",
+            "type": "ReactNode",
+            "options": [],
+            "isEvent": false,
+            "isHidden": false
+          },
+          {
+            "name": "size",
+            "type": "'sm' | 'md' | 'lg'",
+            "options": [
+              "sm",
+              "md",
+              "lg"
+            ],
+            "isEvent": false,
+            "isHidden": false
+          },
+          {
+            "name": "tone",
+            "type": "'neutral' | 'brand' | 'danger'",
+            "options": [
+              "neutral",
+              "brand",
+              "danger"
+            ],
+            "isEvent": false,
+            "isHidden": false
+          },
+          {
+            "name": "disabled",
+            "type": "boolean",
+            "options": [],
+            "isEvent": false,
+            "isHidden": false
+          },
+          {
+            "name": "loading",
+            "type": "boolean",
+            "options": [],
+            "isEvent": false,
+            "isHidden": false
+          },
+          {
+            "name": "onClick",
+            "type": "() => void",
+            "options": [],
+            "isEvent": true,
+            "isHidden": false
+          }
+        ],
+        "defaultArgs": {
+          "children": "Preview",
+          "size": "sm",
+          "tone": "neutral"
+        },
+        "controls": {
+          "size": {
+            "control": "radio",
+            "options": [
+              "sm",
+              "md",
+              "lg"
+            ]
+          },
+          "tone": {
+            "control": "inline-radio",
+            "options": [
+              "neutral",
+              "brand",
+              "danger"
+            ]
+          },
+          "onClick": {
+            "control": false,
+            "useFn": true
+          }
+        },
+        "stories": [
+          {
+            "name": "Default",
+            "lens": "baseline"
+          },
+          {
+            "name": "Small",
+            "lens": "decision"
+          },
+          {
+            "name": "Large",
+            "lens": "decision"
+          },
+          {
+            "name": "Brand",
+            "lens": "decision"
+          },
+          {
+            "name": "Danger",
+            "lens": "decision"
+          },
+          {
+            "name": "Disabled",
+            "lens": "state"
+          },
+          {
+            "name": "Loading",
+            "lens": "state"
+          },
+          {
+            "name": "LongContent",
+            "lens": "boundary"
+          }
+        ],
+        "notes": [
+          "Use fn() for event handlers and hide direct controls for them.",
+          "Prefer one or two decision stories over rendering every enum combination."
+        ],
+        "lenses": [
+          "baseline",
+          "decision",
+          "state",
+          "boundary",
+          "action"
+        ]
+      },
+      "blueprintMarkdown": "# Button blueprint\n\n_Framework_: react\n\n## Props\n- `children`: `ReactNode`\n- `size`: `'sm' | 'md' | 'lg'`\n- `tone`: `'neutral' | 'brand' | 'danger'`\n- `disabled`: `boolean`\n- `loading`: `boolean`\n- `onClick`: `() => void` _(event)_\n\n## Default args\n- `children`: \"Preview\"\n- `size`: \"sm\"\n- `tone`: \"neutral\"\n\n## Controls\n- `size`: {\"control\": \"radio\", \"options\": [\"sm\", \"md\", \"lg\"]}\n- `tone`: {\"control\": \"inline-radio\", \"options\": [\"neutral\", \"brand\", \"danger\"]}\n- `onClick`: {\"control\": false, \"useFn\": true}\n\n## Recommended stories\n- Default (baseline)\n- Small (decision)\n- Large (decision)\n- Brand (decision)\n- Danger (decision)\n- Disabled (state)\n- Loading (state)\n- LongContent (boundary)\n\n## Notes\n- Use fn() for event handlers and hide direct controls for them.\n- Prefer one or two decision stories over rendering every enum combination."
+    },
+    {
+      "name": "Alert",
+      "framework": "react",
+      "componentPath": "fixtures/alert/Alert.tsx",
+      "componentSource": "export type AlertProps = {\n  title: string;\n  message: string;\n  tone?: 'info' | 'success' | 'danger';\n  dismissible?: boolean;\n  onDismiss?: () => void;\n  className?: string;\n};\n\nexport function Alert({\n  title,\n  message,\n  tone = 'info',\n  dismissible = false,\n  onDismiss,\n  className,\n}: AlertProps) {\n  return (\n    <section className={className} data-tone={tone}>\n      <strong>{title}</strong>\n      <p>{message}</p>\n      {dismissible ? (\n        <button onClick={onDismiss} type=\"button\">\n          Dismiss\n        </button>\n      ) : null}\n    </section>\n  );\n}\n\n",
+      "storyPath": "fixtures/alert/Alert.expected.stories.tsx",
+      "storySource": "import type { Meta, StoryObj } from '@storybook/react';\nimport { fn } from '@storybook/test';\n\nimport { Alert } from './Alert';\n\nconst meta = {\n  title: 'Fixtures/Alert',\n  component: Alert,\n  tags: ['autodocs'],\n  args: {\n    title: 'Deployment queued',\n    message: 'Your release will begin in a few minutes.',\n    tone: 'info',\n    onDismiss: fn(),\n  },\n  argTypes: {\n    tone: {\n      control: 'inline-radio',\n      options: ['info', 'success', 'danger'],\n    },\n    onDismiss: {\n      control: false,\n    },\n    className: {\n      control: false,\n      table: {\n        disable: true,\n      },\n    },\n  },\n} satisfies Meta<typeof Alert>;\n\nexport default meta;\ntype Story = StoryObj<typeof meta>;\n\nexport const Info: Story = {};\n\nexport const Success: Story = {\n  args: {\n    tone: 'success',\n    title: 'Deployment finished',\n    message: 'Everything shipped cleanly.',\n  },\n};\n\nexport const Danger: Story = {\n  args: {\n    tone: 'danger',\n    title: 'Deployment failed',\n    message: 'Rollback started automatically.',\n  },\n};\n\nexport const Dismissible: Story = {\n  args: {\n    dismissible: true,\n  },\n};\n\n",
+      "metaArgs": {
+        "title": "Deployment queued",
+        "message": "Your release will begin in a few minutes.",
+        "tone": "info",
+        "onDismiss": {
+          "__event__": true
+        }
+      },
+      "stories": [
+        {
+          "name": "Info",
+          "args": {}
+        },
+        {
+          "name": "Success",
+          "args": {
+            "tone": "success",
+            "title": "Deployment finished",
+            "message": "Everything shipped cleanly."
+          }
+        },
+        {
+          "name": "Danger",
+          "args": {
+            "tone": "danger",
+            "title": "Deployment failed",
+            "message": "Rollback started automatically."
+          }
+        },
+        {
+          "name": "Dismissible",
+          "args": {
+            "dismissible": true
+          }
+        }
+      ],
+      "blueprintJson": {
+        "component": "Alert",
+        "componentPath": "C:\\Users\\gamin\\storybook-codex\\fixtures\\alert\\Alert.tsx",
+        "framework": "react",
+        "props": [
+          {
+            "name": "title",
+            "type": "string",
+            "options": [],
+            "isEvent": false,
+            "isHidden": false
+          },
+          {
+            "name": "message",
+            "type": "string",
+            "options": [],
+            "isEvent": false,
+            "isHidden": false
+          },
+          {
+            "name": "tone",
+            "type": "'info' | 'success' | 'danger'",
+            "options": [
+              "info",
+              "success",
+              "danger"
+            ],
+            "isEvent": false,
+            "isHidden": false
+          },
+          {
+            "name": "dismissible",
+            "type": "boolean",
+            "options": [],
+            "isEvent": false,
+            "isHidden": false
+          },
+          {
+            "name": "onDismiss",
+            "type": "() => void",
+            "options": [],
+            "isEvent": true,
+            "isHidden": false
+          },
+          {
+            "name": "className",
+            "type": "string",
+            "options": [],
+            "isEvent": false,
+            "isHidden": true
+          }
+        ],
+        "defaultArgs": {
+          "title": "Component title",
+          "message": "Helpful supporting text.",
+          "tone": "info"
+        },
+        "controls": {
+          "tone": {
+            "control": "inline-radio",
+            "options": [
+              "info",
+              "success",
+              "danger"
+            ]
+          },
+          "onDismiss": {
+            "control": false,
+            "useFn": true
+          },
+          "className": {
+            "control": false,
+            "table": {
+              "disable": true
+            }
+          }
+        },
+        "stories": [
+          {
+            "name": "Default",
+            "lens": "baseline"
+          },
+          {
+            "name": "Danger",
+            "lens": "decision"
+          },
+          {
+            "name": "Success",
+            "lens": "decision"
+          },
+          {
+            "name": "Dismissible",
+            "lens": "state"
+          },
+          {
+            "name": "LongContent",
+            "lens": "boundary"
+          }
+        ],
+        "notes": [
+          "Use fn() for event handlers and hide direct controls for them.",
+          "Hide internal props from docs tables and controls: className.",
+          "Prefer one or two decision stories over rendering every enum combination."
+        ],
+        "lenses": [
+          "baseline",
+          "decision",
+          "state",
+          "boundary",
+          "action"
+        ]
+      },
+      "blueprintMarkdown": "# Alert blueprint\n\n_Framework_: react\n\n## Props\n- `title`: `string`\n- `message`: `string`\n- `tone`: `'info' | 'success' | 'danger'`\n- `dismissible`: `boolean`\n- `onDismiss`: `() => void` _(event)_\n- `className`: `string` _(hidden)_\n\n## Default args\n- `title`: \"Component title\"\n- `message`: \"Helpful supporting text.\"\n- `tone`: \"info\"\n\n## Controls\n- `tone`: {\"control\": \"inline-radio\", \"options\": [\"info\", \"success\", \"danger\"]}\n- `onDismiss`: {\"control\": false, \"useFn\": true}\n- `className`: {\"control\": false, \"table\": {\"disable\": true}}\n\n## Recommended stories\n- Default (baseline)\n- Danger (decision)\n- Success (decision)\n- Dismissible (state)\n- LongContent (boundary)\n\n## Notes\n- Use fn() for event handlers and hide direct controls for them.\n- Hide internal props from docs tables and controls: className.\n- Prefer one or two decision stories over rendering every enum combination."
+    },
+    {
+      "name": "ThemeBadge",
+      "framework": "react",
+      "componentPath": "fixtures/theme-badge/ThemeBadge.tsx",
+      "componentSource": "export type ThemeBadgeProps = {\n  label: string;\n  theme?: 'light' | 'dark' | 'system';\n  selected?: boolean;\n  compact?: boolean;\n  className?: string;\n};\n\nexport function ThemeBadge({\n  label,\n  theme = 'system',\n  selected = false,\n  compact = false,\n  className,\n}: ThemeBadgeProps) {\n  return (\n    <span\n      aria-pressed={selected}\n      className={className}\n      data-compact={compact}\n      data-theme={theme}\n    >\n      {label}\n    </span>\n  );\n}\n\n",
+      "storyPath": "fixtures/theme-badge/ThemeBadge.expected.stories.tsx",
+      "storySource": "import type { Meta, StoryObj } from '@storybook/react';\n\nimport { ThemeBadge } from './ThemeBadge';\n\nconst meta = {\n  title: 'Fixtures/ThemeBadge',\n  component: ThemeBadge,\n  tags: ['autodocs'],\n  args: {\n    label: 'Theme ready',\n    theme: 'system',\n  },\n  argTypes: {\n    theme: {\n      control: 'select',\n      options: ['light', 'dark', 'system'],\n    },\n    className: {\n      control: false,\n      table: {\n        disable: true,\n      },\n    },\n  },\n} satisfies Meta<typeof ThemeBadge>;\n\nexport default meta;\ntype Story = StoryObj<typeof meta>;\n\nexport const System: Story = {};\n\nexport const Light: Story = {\n  args: {\n    theme: 'light',\n  },\n};\n\nexport const Dark: Story = {\n  args: {\n    theme: 'dark',\n  },\n};\n\nexport const Selected: Story = {\n  args: {\n    selected: true,\n  },\n};\n\nexport const Compact: Story = {\n  args: {\n    compact: true,\n  },\n};\n\n",
+      "metaArgs": {
+        "label": "Theme ready",
+        "theme": "system"
+      },
+      "stories": [
+        {
+          "name": "System",
+          "args": {}
+        },
+        {
+          "name": "Light",
+          "args": {
+            "theme": "light"
+          }
+        },
+        {
+          "name": "Dark",
+          "args": {
+            "theme": "dark"
+          }
+        },
+        {
+          "name": "Selected",
+          "args": {
+            "selected": true
+          }
+        },
+        {
+          "name": "Compact",
+          "args": {
+            "compact": true
+          }
+        }
+      ],
+      "blueprintJson": {
+        "component": "ThemeBadge",
+        "componentPath": "C:\\Users\\gamin\\storybook-codex\\fixtures\\theme-badge\\ThemeBadge.tsx",
+        "framework": "react",
+        "props": [
+          {
+            "name": "label",
+            "type": "string",
+            "options": [],
+            "isEvent": false,
+            "isHidden": false
+          },
+          {
+            "name": "theme",
+            "type": "'light' | 'dark' | 'system'",
+            "options": [
+              "light",
+              "dark",
+              "system"
+            ],
+            "isEvent": false,
+            "isHidden": false
+          },
+          {
+            "name": "selected",
+            "type": "boolean",
+            "options": [],
+            "isEvent": false,
+            "isHidden": false
+          },
+          {
+            "name": "compact",
+            "type": "boolean",
+            "options": [],
+            "isEvent": false,
+            "isHidden": false
+          },
+          {
+            "name": "className",
+            "type": "string",
+            "options": [],
+            "isEvent": false,
+            "isHidden": true
+          }
+        ],
+        "defaultArgs": {
+          "label": "Ready",
+          "theme": "light"
+        },
+        "controls": {
+          "theme": {
+            "control": "inline-radio",
+            "options": [
+              "light",
+              "dark",
+              "system"
+            ]
+          },
+          "className": {
+            "control": false,
+            "table": {
+              "disable": true
+            }
+          }
+        },
+        "stories": [
+          {
+            "name": "Default",
+            "lens": "baseline"
+          },
+          {
+            "name": "Dark",
+            "lens": "decision"
+          },
+          {
+            "name": "Light",
+            "lens": "decision"
+          },
+          {
+            "name": "Selected",
+            "lens": "state"
+          },
+          {
+            "name": "Compact",
+            "lens": "state"
+          },
+          {
+            "name": "LongContent",
+            "lens": "boundary"
+          }
+        ],
+        "notes": [
+          "Hide internal props from docs tables and controls: className.",
+          "Prefer one or two decision stories over rendering every enum combination."
+        ],
+        "lenses": [
+          "baseline",
+          "decision",
+          "state",
+          "boundary",
+          "action"
+        ]
+      },
+      "blueprintMarkdown": "# ThemeBadge blueprint\n\n_Framework_: react\n\n## Props\n- `label`: `string`\n- `theme`: `'light' | 'dark' | 'system'`\n- `selected`: `boolean`\n- `compact`: `boolean`\n- `className`: `string` _(hidden)_\n\n## Default args\n- `label`: \"Ready\"\n- `theme`: \"light\"\n\n## Controls\n- `theme`: {\"control\": \"inline-radio\", \"options\": [\"light\", \"dark\", \"system\"]}\n- `className`: {\"control\": false, \"table\": {\"disable\": true}}\n\n## Recommended stories\n- Default (baseline)\n- Dark (decision)\n- Light (decision)\n- Selected (state)\n- Compact (state)\n- LongContent (boundary)\n\n## Notes\n- Hide internal props from docs tables and controls: className.\n- Prefer one or two decision stories over rendering every enum combination."
+    },
+    {
+      "name": "Badge",
+      "framework": "react",
+      "componentPath": "fixtures/existing-story/Badge.tsx",
+      "componentSource": "export type BadgeProps = {\n  label: string;\n  variant?: 'soft' | 'solid';\n  rounded?: boolean;\n};\n\nexport function Badge({\n  label,\n  variant = 'soft',\n  rounded = true,\n}: BadgeProps) {\n  return (\n    <span data-rounded={rounded} data-variant={variant}>\n      {label}\n    </span>\n  );\n}\n\n",
+      "storyPath": "fixtures/existing-story/Badge.expected.stories.tsx",
+      "storySource": "import type { Meta, StoryObj } from '@storybook/react';\n\nimport { Badge } from './Badge';\n\nconst meta = {\n  title: 'Legacy/Badge',\n  component: Badge,\n  tags: ['autodocs'],\n  args: {\n    label: 'Queued',\n    variant: 'soft',\n    rounded: true,\n  },\n  argTypes: {\n    variant: {\n      control: 'inline-radio',\n      options: ['soft', 'solid'],\n    },\n  },\n} satisfies Meta<typeof Badge>;\n\nexport default meta;\ntype Story = StoryObj<typeof meta>;\n\nexport const Default: Story = {};\n\nexport const Solid: Story = {\n  args: {\n    label: 'Live',\n    variant: 'solid',\n  },\n};\n\nexport const RoundedOff: Story = {\n  args: {\n    rounded: false,\n  },\n};\n\n",
+      "metaArgs": {
+        "label": "Queued",
+        "variant": "soft",
+        "rounded": true
+      },
+      "stories": [
+        {
+          "name": "Default",
+          "args": {}
+        },
+        {
+          "name": "Solid",
+          "args": {
+            "label": "Live",
+            "variant": "solid"
+          }
+        },
+        {
+          "name": "RoundedOff",
+          "args": {
+            "rounded": false
+          }
+        }
+      ],
+      "blueprintJson": {
+        "component": "Badge",
+        "componentPath": "C:\\Users\\gamin\\storybook-codex\\fixtures\\existing-story\\Badge.tsx",
+        "framework": "react",
+        "props": [
+          {
+            "name": "label",
+            "type": "string",
+            "options": [],
+            "isEvent": false,
+            "isHidden": false
+          },
+          {
+            "name": "variant",
+            "type": "'soft' | 'solid'",
+            "options": [
+              "soft",
+              "solid"
+            ],
+            "isEvent": false,
+            "isHidden": false
+          },
+          {
+            "name": "rounded",
+            "type": "boolean",
+            "options": [],
+            "isEvent": false,
+            "isHidden": false
+          }
+        ],
+        "defaultArgs": {
+          "label": "Ready",
+          "variant": "soft"
+        },
+        "controls": {
+          "variant": {
+            "control": "inline-radio",
+            "options": [
+              "soft",
+              "solid"
+            ]
+          }
+        },
+        "stories": [
+          {
+            "name": "Default",
+            "lens": "baseline"
+          },
+          {
+            "name": "Solid",
+            "lens": "decision"
+          },
+          {
+            "name": "LongContent",
+            "lens": "boundary"
+          }
+        ],
+        "notes": [
+          "Prefer one or two decision stories over rendering every enum combination."
+        ],
+        "lenses": [
+          "baseline",
+          "decision",
+          "state",
+          "boundary",
+          "action"
+        ]
+      },
+      "blueprintMarkdown": "# Badge blueprint\n\n_Framework_: react\n\n## Props\n- `label`: `string`\n- `variant`: `'soft' | 'solid'`\n- `rounded`: `boolean`\n\n## Default args\n- `label`: \"Ready\"\n- `variant`: \"soft\"\n\n## Controls\n- `variant`: {\"control\": \"inline-radio\", \"options\": [\"soft\", \"solid\"]}\n\n## Recommended stories\n- Default (baseline)\n- Solid (decision)\n- LongContent (boundary)\n\n## Notes\n- Prefer one or two decision stories over rendering every enum combination."
+    },
+    {
+      "name": "InfoPanel",
+      "framework": "vue",
+      "componentPath": "fixtures/vue-info-panel/InfoPanel.vue",
+      "componentSource": "<script setup lang=\"ts\">\nexport type InfoPanelProps = {\n  title: string;\n  tone?: 'info' | 'success' | 'danger';\n  compact?: boolean;\n  className?: string;\n};\n\nwithDefaults(defineProps<InfoPanelProps>(), {\n  tone: 'info',\n  compact: false,\n});\n</script>\n\n<template>\n  <section :class=\"className\" :data-compact=\"compact\" :data-tone=\"tone\">\n    <strong>{{ title }}</strong>\n    <slot>Helpful supporting detail.</slot>\n  </section>\n</template>\n",
+      "storyPath": "fixtures/vue-info-panel/InfoPanel.expected.stories.ts",
+      "storySource": "import type { Meta, StoryObj } from '@storybook/vue3-vite';\n\nimport InfoPanel from './InfoPanel.vue';\n\nconst meta = {\n  title: 'Fixtures/Vue/InfoPanel',\n  component: InfoPanel,\n  tags: ['autodocs'],\n  args: {\n    title: 'Release notes available',\n    tone: 'info',\n    compact: false,\n  },\n  argTypes: {\n    tone: {\n      control: 'inline-radio',\n      options: ['info', 'success', 'danger'],\n    },\n    className: {\n      control: false,\n      table: {\n        disable: true,\n      },\n    },\n  },\n} satisfies Meta<typeof InfoPanel>;\n\nexport default meta;\ntype Story = StoryObj<typeof meta>;\n\nexport const Default: Story = {};\n\nexport const Success: Story = {\n  args: {\n    tone: 'success',\n    title: 'Release published',\n  },\n};\n\nexport const Danger: Story = {\n  args: {\n    tone: 'danger',\n    title: 'Release blocked',\n  },\n};\n\nexport const Compact: Story = {\n  args: {\n    compact: true,\n  },\n};\n",
+      "metaArgs": {
+        "title": "Release notes available",
+        "tone": "info",
+        "compact": false
+      },
+      "stories": [
+        {
+          "name": "Default",
+          "args": {}
+        },
+        {
+          "name": "Success",
+          "args": {
+            "tone": "success",
+            "title": "Release published"
+          }
+        },
+        {
+          "name": "Danger",
+          "args": {
+            "tone": "danger",
+            "title": "Release blocked"
+          }
+        },
+        {
+          "name": "Compact",
+          "args": {
+            "compact": true
+          }
+        }
+      ],
+      "blueprintJson": {
+        "component": "InfoPanel",
+        "componentPath": "C:\\Users\\gamin\\storybook-codex\\fixtures\\vue-info-panel\\InfoPanel.vue",
+        "framework": "vue",
+        "props": [
+          {
+            "name": "title",
+            "type": "string",
+            "options": [],
+            "isEvent": false,
+            "isHidden": false
+          },
+          {
+            "name": "tone",
+            "type": "'info' | 'success' | 'danger'",
+            "options": [
+              "info",
+              "success",
+              "danger"
+            ],
+            "isEvent": false,
+            "isHidden": false
+          },
+          {
+            "name": "compact",
+            "type": "boolean",
+            "options": [],
+            "isEvent": false,
+            "isHidden": false
+          },
+          {
+            "name": "className",
+            "type": "string",
+            "options": [],
+            "isEvent": false,
+            "isHidden": true
+          }
+        ],
+        "defaultArgs": {
+          "title": "Component title",
+          "tone": "info"
+        },
+        "controls": {
+          "tone": {
+            "control": "inline-radio",
+            "options": [
+              "info",
+              "success",
+              "danger"
+            ]
+          },
+          "className": {
+            "control": false,
+            "table": {
+              "disable": true
+            }
+          }
+        },
+        "stories": [
+          {
+            "name": "Default",
+            "lens": "baseline"
+          },
+          {
+            "name": "Danger",
+            "lens": "decision"
+          },
+          {
+            "name": "Success",
+            "lens": "decision"
+          },
+          {
+            "name": "Compact",
+            "lens": "state"
+          },
+          {
+            "name": "LongContent",
+            "lens": "boundary"
+          }
+        ],
+        "notes": [
+          "Hide internal props from docs tables and controls: className.",
+          "Prefer one or two decision stories over rendering every enum combination."
+        ],
+        "lenses": [
+          "baseline",
+          "decision",
+          "state",
+          "boundary",
+          "action"
+        ]
+      },
+      "blueprintMarkdown": "# InfoPanel blueprint\n\n_Framework_: vue\n\n## Props\n- `title`: `string`\n- `tone`: `'info' | 'success' | 'danger'`\n- `compact`: `boolean`\n- `className`: `string` _(hidden)_\n\n## Default args\n- `title`: \"Component title\"\n- `tone`: \"info\"\n\n## Controls\n- `tone`: {\"control\": \"inline-radio\", \"options\": [\"info\", \"success\", \"danger\"]}\n- `className`: {\"control\": false, \"table\": {\"disable\": true}}\n\n## Recommended stories\n- Default (baseline)\n- Danger (decision)\n- Success (decision)\n- Compact (state)\n- LongContent (boundary)\n\n## Notes\n- Hide internal props from docs tables and controls: className.\n- Prefer one or two decision stories over rendering every enum combination."
+    },
+    {
+      "name": "StatusPill",
+      "framework": "svelte",
+      "componentPath": "fixtures/svelte-status-pill/StatusPill.svelte",
+      "componentSource": "<script lang=\"ts\">\n  export type StatusPillProps = {\n    label: string;\n    tone?: 'neutral' | 'brand' | 'danger';\n    selected?: boolean;\n    compact?: boolean;\n  };\n\n  let {\n    label,\n    tone = 'neutral',\n    selected = false,\n    compact = false,\n  }: StatusPillProps = $props();\n</script>\n\n<span data-compact={compact} data-selected={selected} data-tone={tone}>\n  {label}\n</span>\n",
+      "storyPath": "fixtures/svelte-status-pill/StatusPill.expected.stories.svelte",
+      "storySource": "<script module lang=\"ts\">\n  import { defineMeta } from '@storybook/addon-svelte-csf';\n\n  import StatusPill from './StatusPill.svelte';\n\n  const { Story } = defineMeta({\n    title: 'Fixtures/Svelte/StatusPill',\n    component: StatusPill,\n    tags: ['autodocs'],\n    args: {\n      label: 'Synced',\n      tone: 'neutral',\n      selected: false,\n      compact: false,\n    },\n    argTypes: {\n      tone: {\n        control: 'inline-radio',\n        options: ['neutral', 'brand', 'danger'],\n      },\n    },\n  });\n</script>\n\n<Story name=\"Default\" />\n\n<Story\n  name=\"Brand\"\n  args={{\n    tone: 'brand',\n    label: 'Ready',\n  }}\n/>\n\n<Story\n  name=\"Danger\"\n  args={{\n    tone: 'danger',\n    label: 'Failed',\n  }}\n/>\n\n<Story\n  name=\"Selected\"\n  args={{\n    selected: true,\n  }}\n/>\n\n<Story\n  name=\"Compact\"\n  args={{\n    compact: true,\n  }}\n/>\n",
+      "metaArgs": {
+        "label": "Synced",
+        "tone": "neutral",
+        "selected": false,
+        "compact": false
+      },
+      "stories": [
+        {
+          "name": "Default",
+          "args": {}
+        },
+        {
+          "name": "Brand",
+          "args": {
+            "tone": "brand",
+            "label": "Ready"
+          }
+        },
+        {
+          "name": "Danger",
+          "args": {
+            "tone": "danger",
+            "label": "Failed"
+          }
+        },
+        {
+          "name": "Selected",
+          "args": {
+            "selected": true
+          }
+        },
+        {
+          "name": "Compact",
+          "args": {
+            "compact": true
+          }
+        }
+      ],
+      "blueprintJson": {
+        "component": "StatusPill",
+        "componentPath": "C:\\Users\\gamin\\storybook-codex\\fixtures\\svelte-status-pill\\StatusPill.svelte",
+        "framework": "svelte",
+        "props": [
+          {
+            "name": "label",
+            "type": "string",
+            "options": [],
+            "isEvent": false,
+            "isHidden": false
+          },
+          {
+            "name": "tone",
+            "type": "'neutral' | 'brand' | 'danger'",
+            "options": [
+              "neutral",
+              "brand",
+              "danger"
+            ],
+            "isEvent": false,
+            "isHidden": false
+          },
+          {
+            "name": "selected",
+            "type": "boolean",
+            "options": [],
+            "isEvent": false,
+            "isHidden": false
+          },
+          {
+            "name": "compact",
+            "type": "boolean",
+            "options": [],
+            "isEvent": false,
+            "isHidden": false
+          }
+        ],
+        "defaultArgs": {
+          "label": "Ready",
+          "tone": "neutral"
+        },
+        "controls": {
+          "tone": {
+            "control": "inline-radio",
+            "options": [
+              "neutral",
+              "brand",
+              "danger"
+            ]
+          }
+        },
+        "stories": [
+          {
+            "name": "Default",
+            "lens": "baseline"
+          },
+          {
+            "name": "Brand",
+            "lens": "decision"
+          },
+          {
+            "name": "Danger",
+            "lens": "decision"
+          },
+          {
+            "name": "Selected",
+            "lens": "state"
+          },
+          {
+            "name": "Compact",
+            "lens": "state"
+          },
+          {
+            "name": "LongContent",
+            "lens": "boundary"
+          }
+        ],
+        "notes": [
+          "Prefer one or two decision stories over rendering every enum combination."
+        ],
+        "lenses": [
+          "baseline",
+          "decision",
+          "state",
+          "boundary",
+          "action"
+        ]
+      },
+      "blueprintMarkdown": "# StatusPill blueprint\n\n_Framework_: svelte\n\n## Props\n- `label`: `string`\n- `tone`: `'neutral' | 'brand' | 'danger'`\n- `selected`: `boolean`\n- `compact`: `boolean`\n\n## Default args\n- `label`: \"Ready\"\n- `tone`: \"neutral\"\n\n## Controls\n- `tone`: {\"control\": \"inline-radio\", \"options\": [\"neutral\", \"brand\", \"danger\"]}\n\n## Recommended stories\n- Default (baseline)\n- Brand (decision)\n- Danger (decision)\n- Selected (state)\n- Compact (state)\n- LongContent (boundary)\n\n## Notes\n- Prefer one or two decision stories over rendering every enum combination."
+    }
+  ]
+}
