@@ -21,3 +21,9 @@ jobs:
 
       - name: Run repository validator
         run: python scripts/validate_storybook_codex.py
+
+      - name: Run demo parser tests
+        run: python demo/test_build.py
+
+      - name: Rebuild demo data (catches parser regressions)
+        run: python demo/build.py
