@@ -252,6 +252,29 @@ def validate_cases(errors: list[str]) -> None:
             if control.get("table", {}).get("disable") is not True:
                 fail(f"Blueprint {case['name']} should hide prop: {hidden_prop}", errors)
 
+        markdown_markers = case.get("expectedMarkdownMarkers", [])
+        if markdown_markers:
+            md_result = subprocess.run(
+                [sys.executable, str(blueprint_script), str(component_path), "--format", "markdown"],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            if md_result.returncode != 0:
+                fail(
+                    f"Blueprint markdown run failed for {case['name']}: "
+                    f"{md_result.stdout}{md_result.stderr}",
+                    errors,
+                )
+                continue
+            md_output = md_result.stdout
+            for marker in markdown_markers:
+                if marker not in md_output:
+                    fail(
+                        f"Blueprint {case['name']} markdown is missing marker: {marker}",
+                        errors,
+                    )
+
 
 def main() -> int:
     errors: list[str] = []

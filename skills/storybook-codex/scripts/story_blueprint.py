@@ -280,16 +280,54 @@ def main() -> int:
     blueprint = build_blueprint(component_path)
 
     if args.format == "markdown":
-        print(f"# {blueprint['component']} blueprint")
-        print("\n## Recommended stories")
-        for story in blueprint["stories"]:
-            print(f"- {story['name']} ({story['lens']})")
-        print("\n## Notes")
-        for note in blueprint["notes"]:
-            print(f"- {note}")
+        print(render_markdown(blueprint))
     else:
         print(json.dumps(blueprint, indent=2))
     return 0
+
+
+def render_markdown(blueprint: dict[str, object]) -> str:
+    lines: list[str] = []
+    lines.append(f"# {blueprint['component']} blueprint")
+    lines.append(f"\n_Framework_: {blueprint['framework']}")
+
+    props = list(blueprint.get("props", []))
+    if props:
+        lines.append("\n## Props")
+        for prop in props:
+            flags: list[str] = []
+            if prop.get("isEvent"):
+                flags.append("event")
+            if prop.get("isHidden"):
+                flags.append("hidden")
+            suffix = f" _({', '.join(flags)})_" if flags else ""
+            lines.append(f"- `{prop['name']}`: `{prop['type']}`{suffix}")
+
+    default_args = blueprint.get("defaultArgs", {}) or {}
+    if default_args:
+        lines.append("\n## Default args")
+        for name, value in default_args.items():
+            lines.append(f"- `{name}`: {json.dumps(value)}")
+
+    controls = blueprint.get("controls", {}) or {}
+    if controls:
+        lines.append("\n## Controls")
+        for name, config in controls.items():
+            lines.append(f"- `{name}`: {json.dumps(config)}")
+
+    stories = list(blueprint.get("stories", []))
+    if stories:
+        lines.append("\n## Recommended stories")
+        for story in stories:
+            lines.append(f"- {story['name']} ({story['lens']})")
+
+    notes = list(blueprint.get("notes", []))
+    if notes:
+        lines.append("\n## Notes")
+        for note in notes:
+            lines.append(f"- {note}")
+
+    return "\n".join(lines)
 
 
 if __name__ == "__main__":
