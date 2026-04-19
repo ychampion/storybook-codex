@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Storybook Codex — Story Outcomes</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Component list">
+      <div class="sidebar__header">
+        <p class="eyebrow">Skill demo</p>
+        <h1>Storybook Codex</h1>
+        <p class="sidebar__copy">See what users get after running the skill — live stories, generated <code>.stories</code> files, and the blueprint report.</p>
+      </div>
+      <nav>
+        <ul class="component-list" id="component-list" role="tablist"></ul>
+      </nav>
+      <footer class="sidebar__footer">
+        <p id="generated-at"></p>
+      </footer>
+    </aside>
+
+    <main class="main-panel" id="main-panel" aria-live="polite">
+      <div class="hero">
+        <p class="eyebrow">Story Outcomes</p>
+        <h2 id="component-name">Loading...</h2>
+        <div class="hero__meta">
+          <span class="badge" id="component-framework">...</span>
+          <span class="path" id="component-path"></span>
+        </div>
+      </div>
+
+      <section class="panel" id="stories-panel">
+        <div class="panel__header">
+          <h3>Live stories</h3>
+          <p class="panel__hint">Each card is a named <code>Story</code> export from the generated file, rendered with its <code>args</code>.</p>
+        </div>
+        <div class="story-grid" id="story-grid" data-testid="story-grid"></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel__header">
+          <h3>Generated story file</h3>
+          <p class="panel__hint">The file storybook-codex writes into your repo.</p>
+        </div>
+        <pre class="code-block code-block--story"><code id="story-source" data-testid="story-source"></code></pre>
+      </section>
+
+      <section class="panel">
+        <div class="panel__header">
+          <h3>Component source</h3>
+          <p class="panel__hint">The input the skill reads.</p>
+        </div>
+        <pre class="code-block"><code id="component-source" data-testid="component-source"></code></pre>
+      </section>
+
+      <section class="panel">
+        <div class="panel__header">
+          <h3>Blueprint (deterministic helper)</h3>
+          <p class="panel__hint">Output of <code>story_blueprint.py --format markdown</code> — props, defaults, controls, recommended stories.</p>
+        </div>
+        <article class="markdown-output" id="blueprint-output" data-testid="blueprint-output"></article>
+      </section>
+    </main>
+  </div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
