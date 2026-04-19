@@ -2,7 +2,7 @@
 
 `storybook-codex` is a plugin-ready Codex package for Storybook work.
 
-A Storybook Codex is a focused Codex skill that understands Storybook workflows and helps teams generate, update, document, and review component stories across a repo instead of only writing a single `.stories.tsx` file.
+Storybook is a developer tool for building a gallery of UI components and their states, so teams can view things like buttons, dialogs, and forms without running the full app. Storybook Codex helps Codex create, update, document, and review those Storybook examples across a repo.
 
 ![Storybook Codex demo — live stories for React, Vue, and Svelte fixtures](demo/storybook-codex.gif)
 
