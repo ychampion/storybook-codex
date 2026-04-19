@@ -1,0 +1,9 @@
+:root {
+  --theme-surface-light: #fff7ed;
+  --theme-surface-dark: #1c1917;
+  --theme-text-light: #292524;
+  --theme-text-dark: #fafaf9;
+  --density-compact: 0.875rem;
+  --density-comfortable: 1rem;
+  --radius-card: 20px;
+}

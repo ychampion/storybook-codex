@@ -1,102 +1,112 @@
 # Storybook Codex
 
-`storybook-codex` is a plugin-ready Codex package centered on one reusable skill for React, Vue, and Svelte Storybook work.
+`storybook-codex` is a plugin-ready Codex package for Storybook work that now goes well beyond "write a `.stories.tsx` file."
 
-It is designed to help Codex:
+It gives Codex one focused skill that can:
 
-- create or update `.stories.tsx` files with modern object-story syntax
-- create or update Vue `.stories.ts` files with modern object-story syntax
-- create or update Svelte `.stories.svelte` files when the repo uses native Svelte CSF
-- add representative named stories instead of prop cartesian products
-- write `args`, selective `argTypes`, and controls that match current Storybook guidance
-- apply autodocs at the right level
-- scaffold Chromatic only when asked or when a repo is already using it
+- create or update React, Vue, and Svelte Storybook stories
+- generate `args`, selective `argTypes`, controls, and autodocs tags
+- scaffold interaction stories with `play()` and `storybook/test`
+- suggest accessibility stories instead of treating a11y as an afterthought
+- wire visual regression hooks for Chromatic or a local Playwright harness
+- detect design tokens and expose theme or density globals
+- review existing stories and score Storybook health across a repo
+- mirror story structure between frameworks
 
-## Why this is better than a plain prompt
+## What makes this useful
 
-The skill is opinionated in a few places that matter:
+Most Storybook prompts stop at "make a story file." This skill pushes further:
 
-- it thinks in `story design lenses`, so it chooses the smallest useful set of stories instead of dumping prop permutations
-- it is migration-aware, so existing story files get upgraded without flattening local conventions
-- it is framework-aware, so React, Vue, and Svelte repos each get the story format that fits the local Storybook setup
-- it includes a deterministic `story_blueprint.py` helper to inventory props and suggest controls, docs exposure, and story names before writing files
-- it packages plugin metadata and icons so it already looks like a real Codex artifact instead of a loose markdown note
+- `story_blueprint.py` is repo-aware, not just prop-aware. It mines usage, co-occurrence, branchy props, interaction flows, a11y lenses, and visual baselines.
+- `storybook_audit.py` turns the skill into an ongoing quality system with a Story Health Score.
+- `story_sync.py` keeps React, Vue, and Svelte story structures aligned for multi-framework design systems.
+- `token_catalog.py` finds CSS-variable and Tailwind-style tokens and suggests Storybook globals for theme and density.
+- `tools/fixtures-viewer/` makes the validation contract browsable instead of leaving it buried in JSON.
 
-## Public release checklist
-
-This repo is set up to be publishable:
-
-- plugin manifest present
-- skill metadata present
-- icons present
-- deterministic validator present
-- CI workflow present
-- MIT license present
-
-## What ships in this repo
+## What ships
 
 - `.codex-plugin/plugin.json` for plugin packaging
 - `skills/storybook-codex/` with the actual Codex skill
-- `references/` guidance split by React, Vue, Svelte, controls/autodocs, story selection, and Chromatic
-- `assets/templates/` starter files for React, Vue, and Svelte stories plus preview config and Chromatic
-- `skills/storybook-codex/scripts/story_blueprint.py` for deterministic prop-to-story recommendations
-- `fixtures/` with representative React components and expected story outputs
-- `fixtures/cases.json` as the machine-readable validation contract for expected stories, markers, templates, and blueprint behavior
+- `skills/storybook-codex/scripts/story_blueprint.py` for blueprinting, review mode, and watch mode
+- `skills/storybook-codex/scripts/storybook_audit.py` for repo-wide Storybook scoring
+- `skills/storybook-codex/scripts/story_sync.py` for multi-framework story mirroring
+- `skills/storybook-codex/scripts/token_catalog.py` for token-aware globals
+- `skills/storybook-codex/references/` for framework rules, visual diff, interaction, a11y, token, audit, and Storybook 9 guidance
+- `skills/storybook-codex/assets/templates/` for standard stories, interaction stories, visual regression specs, token preview config, and library-specific starters
+- `fixtures/cases.json` as the machine-readable validation contract
+- `tools/fixtures-viewer/` as a browsable UI for that contract
 - `scripts/validate_storybook_codex.py` for zero-dependency validation
 
-## Skill scope
+## Core workflows
 
-V2 keeps the scope intentional:
-
-- React `.stories.tsx`
-- Vue `.stories.ts`
-- Svelte `.stories.svelte` when the repo uses `@storybook/addon-svelte-csf`
-- TypeScript-first story files
-- stable `Meta` + `StoryObj` object stories where the framework expects them
-- optional Chromatic setup
-
-It still does not try to be a general frontend skill or a generic design generator. The V2 scope is Storybook authoring for the three frameworks most likely to share design-system components.
-
-## Unique touches
-
-### Story design lenses
-
-The skill explicitly chooses among five lenses:
-
-- baseline
-- decision
-- state
-- boundary
-- action
-
-That keeps generated stories more editorial and less robotic.
-
-### Blueprint-first workflow
-
-When a component API is large, the skill can run:
+### Blueprint a component
 
 ```sh
 python3 skills/storybook-codex/scripts/story_blueprint.py path/to/Component.tsx
 ```
 
-That produces a deterministic blueprint with:
+Useful flags:
 
-- prop inventory
-- default args suggestions
-- control recommendations
-- hidden-prop recommendations
-- story-name recommendations by lens
+- `--repo-root <path>` to mine usage in the local app
+- `--review-story path/to/Component.stories.tsx` to critique an existing story file
+- `--watch` to rerun the blueprint while the component changes
 
-The same helper now accepts `.tsx`, `.vue`, and `.svelte` component files when props are expressed in a typed props block or a supported framework-native prop declaration.
+### Audit a Storybook repo
+
+```sh
+python3 skills/storybook-codex/scripts/storybook_audit.py path/to/repo --format markdown
+```
+
+Use `--fail-under` to turn it into a PR gate.
+
+### Detect design tokens
+
+```sh
+python3 skills/storybook-codex/scripts/token_catalog.py path/to/repo
+```
+
+### Mirror stories across frameworks
+
+```sh
+python3 skills/storybook-codex/scripts/story_sync.py src/Button.stories.tsx --target vue
+```
+
+## Fixtures contract
+
+`fixtures/cases.json` is the validation contract for the repo. It covers:
+
+- expected story exports and markers
+- template markers
+- blueprint expectations
+- review expectations
+- audit expectations
+- token catalog expectations
+- story sync expectations
+
+The viewer at `tools/fixtures-viewer/index.html` reads that contract and turns it into a quick QA dashboard.
 
 ## Example prompts
 
 - `Use $storybook-codex to create stories for src/components/Button.tsx.`
-- `Use $storybook-codex to create stories for src/components/StatusPanel.vue.`
-- `Use $storybook-codex to create native Svelte stories for src/lib/StatusPill.svelte.`
-- `Use $storybook-codex to convert src/components/Badge.stories.tsx away from Template.bind and add autodocs.`
-- `Use $storybook-codex to add controls for size and tone, but hide internal props.`
-- `Use $storybook-codex to scaffold Chromatic for this Storybook repo.`
+- `Use $storybook-codex to review src/components/Dialog.stories.tsx and raise story health.`
+- `Use $storybook-codex to add interaction stories and visual regression coverage for the modal.`
+- `Use $storybook-codex to sync the React stories for Button into the Vue package.`
+- `Use $storybook-codex to expose theme and density globals from our design tokens.`
+- `Use $storybook-codex to audit this Storybook repo and tell me which components are weak.`
+
+## Library-specific starters
+
+The repo includes focused templates for common design-system stacks:
+
+- shadcn/ui
+- Radix UI
+- Headless UI
+
+Those templates intentionally cover the awkward parts that generic story generators miss, like `asChild`, compound primitives, focus traps, and render-wrapper stories.
+
+## Storybook 9 posture
+
+The repo now defaults to `storybook/test` instead of `@storybook/test`, keeps object stories first, and includes explicit Storybook 9 readiness guidance so migrations happen while touching real files, not as busywork.
 
 ## Install locally
 
@@ -107,7 +117,7 @@ Common locations:
 - repo-scoped: `.agents/skills/storybook-codex`
 - user-scoped: `%USERPROFILE%\\.agents\\skills\\storybook-codex`
 
-If you want the whole plugin package, keep the repository intact so `.codex-plugin/plugin.json` and the bundled assets stay together.
+If you want the whole plugin package, keep the repository intact so `.codex-plugin/plugin.json`, assets, scripts, and viewer stay together.
 
 ## Validation
 
@@ -117,50 +127,15 @@ Run the repository validator from the repo root:
 python3 scripts/validate_storybook_codex.py
 ```
 
-Use `python3` on macOS/Linux. On Windows, use `python` or `py -3`.
+Platform notes:
 
-The validator checks the plugin/skill shape and the expected story outputs in `fixtures/`.
-`fixtures/cases.json` is the contract file that maps each fixture to its required story exports, control markers, template expectations, and blueprint assertions.
+- macOS and Linux: use `python3`
+- Windows: use `python` or `py -3`
 
-A shortened example:
+GitHub Actions runs the same validator in CI.
 
-```json
-{
-  "stories": [
-    {
-      "name": "basic-button",
-      "requiredStories": ["Default", "Brand", "Disabled", "Loading", "Large"]
-    },
-    {
-      "name": "vue-info-panel",
-      "requiredStories": ["Default", "Success", "Danger", "Compact"]
-    },
-    {
-      "name": "svelte-status-pill",
-      "requiredStories": ["Default", "Brand", "Danger", "Selected", "Compact"]
-    }
-  ],
-  "blueprints": [
-    {
-      "name": "button-blueprint",
-      "expectedStories": ["Default", "Brand", "Disabled", "Loading", "LongContent"]
-    }
-  ]
-}
-```
+## Scope
 
-You can also inspect the blueprint helper directly:
+This repo is intentionally narrow. It is not a generic frontend design skill and it is not a framework-agnostic styling assistant.
 
-```sh
-python3 skills/storybook-codex/scripts/story_blueprint.py fixtures/basic-button/Button.tsx
-```
-
-## CI
-
-The repo includes a lightweight validation workflow:
-
-```sh
-python3 scripts/validate_storybook_codex.py
-```
-
-Use `python3` locally on macOS/Linux and `python` or `py -3` on Windows. GitHub Actions runs the same validator inside the workflow environment.
+It is for Storybook authoring, review, migration, visual QA, and documentation across the UI stacks most design-system teams actually ship today: React, Vue, and Svelte.

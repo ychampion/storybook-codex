@@ -1,10 +1,10 @@
 interface:
   display_name: "Storybook Codex"
-  short_description: "Create React, Vue, and Svelte Storybook stories"
+  short_description: "Create, review, and audit Storybook stories across UI stacks"
   icon_small: "./assets/storybook-codex-small.svg"
   icon_large: "./assets/storybook-codex-logo.svg"
   brand_color: "#F05A28"
-  default_prompt: "Use $storybook-codex to create or update React, Vue, or Svelte Storybook stories with autodocs and controls."
+  default_prompt: "Use $storybook-codex to create, review, or audit React, Vue, and Svelte Storybook stories with controls, play() coverage, and visual QA hooks."
 
 policy:
   allow_implicit_invocation: true

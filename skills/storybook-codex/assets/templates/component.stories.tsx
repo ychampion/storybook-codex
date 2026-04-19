@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { fn } from '@storybook/test';
+import { fn } from 'storybook/test';
 
 import { __COMPONENT_NAME__ } from '__COMPONENT_IMPORT_PATH__';
 
@@ -28,4 +28,3 @@ export const Disabled: Story = {
     disabled: true,
   },
 };
-

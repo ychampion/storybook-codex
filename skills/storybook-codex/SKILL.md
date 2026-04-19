@@ -1,11 +1,25 @@
 ---
 name: storybook-codex
-description: Create or update React, Vue, and Svelte Storybook stories, controls, autodocs tags, and optional Chromatic scaffolding. Use when the task mentions Storybook, `stories`, `.stories.tsx`, `.stories.ts`, `.stories.svelte`, `argTypes`, `CSF`, Storybook component documentation, or migrating older story patterns to modern object stories. Do not use for generic UI design, framework-agnostic styling tasks, or non-Storybook component work.
+description: Create, review, sync, and audit React, Vue, and Svelte Storybook stories with controls, play functions, visual diff hooks, design-token globals, and optional Chromatic scaffolding. Use when the task mentions Storybook, stories, `.stories.tsx`, `.stories.ts`, `.stories.svelte`, `argTypes`, `CSF`, `play()`, addon-a11y, Chromatic, visual regression, story health, story audit, or syncing stories between frameworks. Do not use for generic UI design, framework-agnostic styling tasks, or non-Storybook component work.
+triggers:
+  - stories
+  - storybook
+  - .stories.tsx
+  - .stories.ts
+  - .stories.svelte
+  - argTypes
+  - CSF
+  - play()
+  - Chromatic
+  - visual regression
+  - story health
 ---
 
 # Storybook Codex
 
-Use this skill for framework-specific Storybook authoring:
+Create or update React, Vue, and Svelte Storybook stories, then review or audit them when the repo already has Storybook coverage.
+
+Use this skill for Storybook authoring and maintenance across React, Vue, and Svelte:
 
 - React components and `.stories.tsx`
 - Vue single-file components and `.stories.ts`
@@ -14,88 +28,123 @@ Use this skill for framework-specific Storybook authoring:
 ## Default behavior
 
 1. Inspect the repo before editing anything.
-2. Detect the framework from the component extension and the local Storybook setup before choosing a story format.
-3. Detect existing Storybook config, preview tags, story naming/title conventions, and current component story patterns.
-4. If you need a quick prop inventory or story shape suggestion, run `python3 skills/storybook-codex/scripts/story_blueprint.py <component-path>` on macOS/Linux, or `python` / `py -3` on Windows.
-5. Prefer updating the local convention over imposing a generic template.
-6. Keep stories compact and representative.
+2. Detect the framework, Storybook version, title conventions, preview globals, and existing story style before choosing a format.
+3. Prefer updating the local convention over imposing a generic template.
+4. Keep stories compact and editorial instead of generating prop cartesian products.
+5. Use `storybook/test` for `fn`, `userEvent`, `within`, and `expect` when the story needs action logging or a `play()` flow.
 
-## Framework routing
+## Built-in modes
 
-- Read [references/react-stories.md](references/react-stories.md) for React components and `.stories.tsx`.
-- Read [references/vue-stories.md](references/vue-stories.md) for Vue single-file components and `.stories.ts`.
-- Read [references/svelte-stories.md](references/svelte-stories.md) for Svelte components and `.stories.svelte`.
-- If the repo already uses a valid local pattern for the same framework, prefer that pattern over the template files.
+### Blueprint mode
+
+Use the blueprint helper when you need deterministic analysis before writing stories.
+
+```sh
+python3 skills/storybook-codex/scripts/story_blueprint.py path/to/Component.tsx
+```
+
+It can now do more than prop inventory:
+
+- suggest stories by lens
+- mine usage signals from the repo
+- detect prop co-occurrence clusters
+- detect props that gate UI branches
+- suggest interaction stories
+- suggest accessibility stories
+- propose a `visual-regression-codex` capture set
+
+Useful flags:
+
+- `--repo-root <path>` for usage mining
+- `--review-story path/to/Component.stories.tsx` for a deterministic story critique
+- `--watch` for active component work
+
+### Audit mode
+
+Use the audit helper when the task is "review this Storybook repo" or "gate this PR."
+
+```sh
+python3 skills/storybook-codex/scripts/storybook_audit.py path/to/repo --format markdown
+```
+
+It reports a Story Health Score and flags:
+
+- missing lens coverage
+- missing interaction coverage
+- missing accessibility coverage
+- missing visual regression coverage
+- legacy story syntax
+- components that still have no story file
+
+### Token-aware mode
+
+Use the token helper when stories should reflect design tokens or toolbar globals.
+
+```sh
+python3 skills/storybook-codex/scripts/token_catalog.py path/to/repo
+```
+
+It detects CSS custom properties and Tailwind-style theme tokens, then suggests `globalTypes` for theme and density controls.
+
+### Sync mode
+
+Use story sync when the same component exists in more than one framework.
+
+```sh
+python3 skills/storybook-codex/scripts/story_sync.py src/Button.stories.tsx --target vue
+```
+
+Mirror the story structure, then adapt only the framework-specific render details.
 
 ## Story design lenses
 
 Use these lenses to avoid flat, repetitive story files:
 
 - `Baseline`: the normal default state every component needs.
-- `Decision`: visual choices such as size, tone, variant, or theme.
-- `State`: disabled, loading, selected, open, error, dismissible, or compact.
-- `Boundary`: long labels, dense content, empty-ish content, or edge-sized values when they materially change the UI.
-- `Action`: event handlers, play flows, or interaction surfaces that deserve `fn()` or play coverage.
+- `Decision`: size, tone, theme, density, variant, or similar choices.
+- `State`: disabled, loading, selected, open, error, dismissible, compact.
+- `Boundary`: long content, dense content, empty-ish content, awkward wrapping, or overflow.
+- `Action`: `fn()` handlers and `play()` flows.
+- `A11y`: keyboard, focus, labeling, and screen-reader-sensitive states.
+- `Visual`: stable stories worth snapshotting in Chromatic or Playwright.
 
 Do not force every lens into every component. Use the smallest set that makes the component legible and reviewable.
 
 ## Story rules
 
 - Default to the extension that matches the local framework and repo convention.
-- Use stable object stories with `Meta` and `StoryObj` where the framework expects them.
-- Prefer:
-
-```ts
-import type { Meta, StoryObj } from '@storybook/react';
-
-const meta = {
-  component: Button,
-  tags: ['autodocs'],
-} satisfies Meta<typeof Button>;
-
-export default meta;
-type Story = StoryObj<typeof meta>;
-```
-
+- Use object stories with `Meta` and `StoryObj` where the framework expects them.
 - For Svelte repos using `@storybook/addon-svelte-csf`, prefer native `.stories.svelte` files with `defineMeta` and `<Story />`.
 - Do not generate `Template.bind({})`, `ComponentStory`, or other older CSF2 patterns for new work.
 - Prefer component-level `args` for shared defaults.
-- Add a small set of named stories for meaningful states such as default, disabled, loading, tone, size, or theme.
-- Avoid prop cartesian products unless the user explicitly asks for exhaustive coverage.
-- Preserve existing titles, foldering, and story names when updating an existing file unless they are clearly broken.
+- Add named stories for meaningful states and one interaction story when the component has a real event surface.
+- Preserve existing titles, foldering, decorators, loaders, play functions, and docs blocks unless they are clearly obsolete.
 
-## Controls and autodocs
-
-- Let Storybook infer controls when that is sufficient.
-- Add explicit `argTypes` only when inference is weak or the UX is poor.
-- Use selective controls for enums, options, colors, dates, ranges, and hidden internal props.
-- If the component has event handlers, prefer `fn()` from `@storybook/test` for story args instead of exposing raw function controls.
-- If preview-level autodocs already exists, do not duplicate it unnecessarily. Otherwise add `tags: ['autodocs']` on the component story meta.
-
-Read [references/controls-and-autodocs.md](references/controls-and-autodocs.md) when you need the detailed rules.
-
-## Existing story migrations
-
-- Read the existing story first and preserve useful local structure.
-- Migrate old story syntax incrementally to object stories instead of rewriting the file blindly.
-- Keep repo-specific parameters, decorators, play functions, loaders, and docs blocks unless they are clearly obsolete or incompatible.
-- If the repo already uses a different but valid object-story style, follow it.
-- When migrating, keep the original intent of each exported story and only rename stories when the old names are genuinely misleading.
-
-## Chromatic
+## Visual regression and Chromatic
 
 - Only scaffold Chromatic when the user explicitly asks for it or the repo already shows Chromatic usage.
-- Prefer `chromatic.config.json` plus a simple GitHub Actions workflow scaffold.
-- Keep tokens and project IDs as placeholders or secrets references only.
+- If the repo wants local baselines, use the Playwright visual template in `assets/templates/visual-regression.spec.ts`.
+- Treat `visual-regression-codex` as the mode where story writing and screenshot verification happen together.
 
-Read [references/chromatic.md](references/chromatic.md) before writing Chromatic files.
+## Component library heuristics
+
+- shadcn/ui: hide `asChild`, focus on the local implementation, and keep stories close to the app's real variants.
+- Radix UI: write render wrappers for compound primitives and cover `data-state`, keyboard, and focus flows.
+- Headless UI: use real composed render trees and explicit focus-trap stories.
 
 ## References
 
-- Read [references/react-stories.md](references/react-stories.md) for the baseline React story shape and story selection heuristics.
-- Read [references/vue-stories.md](references/vue-stories.md) for Vue story authoring and slot-aware render patterns.
-- Read [references/svelte-stories.md](references/svelte-stories.md) for native Svelte CSF guidance and fallback rules.
-- Read [references/story-design-lenses.md](references/story-design-lenses.md) when you need help deciding which stories are actually worth generating.
-- Read [references/controls-and-autodocs.md](references/controls-and-autodocs.md) for controls, autodocs, and event-handler guidance.
-- Read [references/chromatic.md](references/chromatic.md) for opt-in Chromatic scaffolding rules.
+- Read [references/react-stories.md](references/react-stories.md) for React story shapes.
+- Read [references/vue-stories.md](references/vue-stories.md) for Vue story authoring.
+- Read [references/svelte-stories.md](references/svelte-stories.md) for native Svelte CSF.
+- Read [references/story-design-lenses.md](references/story-design-lenses.md) when deciding which stories matter.
+- Read [references/controls-and-autodocs.md](references/controls-and-autodocs.md) for controls, autodocs, and action args.
+- Read [references/interaction-stories.md](references/interaction-stories.md) for `play()` heuristics.
+- Read [references/accessibility-stories.md](references/accessibility-stories.md) for a11y stories and WCAG-oriented checks.
+- Read [references/visual-diff.md](references/visual-diff.md) for screenshot strategy.
+- Read [references/design-tokens.md](references/design-tokens.md) for token-aware toolbars.
+- Read [references/multi-framework-sync.md](references/multi-framework-sync.md) for cross-framework parity.
+- Read [references/component-library-patterns.md](references/component-library-patterns.md) for shadcn/ui, Radix UI, and Headless UI specifics.
+- Read [references/storybook-9-readiness.md](references/storybook-9-readiness.md) when migrating or normalizing story syntax.
+- Read [references/storybook-audit.md](references/storybook-audit.md) for repo-wide review and PR gates.
 - Use the starter files in [assets/templates](assets/templates/) only as templates. Always adapt them to the local repo.

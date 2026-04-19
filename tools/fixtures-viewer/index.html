@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Storybook Codex Fixtures Viewer</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header class="hero">
+        <p class="eyebrow">storybook-codex</p>
+        <h1>Fixtures Viewer</h1>
+        <p class="lede">
+          Browse the machine-readable validation contract behind the skill.
+          This view reads <code>fixtures/cases.json</code> and turns it into a quick QA map.
+        </p>
+        <div class="actions">
+          <button id="reload" type="button">Reload contract</button>
+          <label class="upload">
+            <span>Load local JSON</span>
+            <input id="file-input" accept="application/json" type="file" />
+          </label>
+        </div>
+        <p class="status" id="status">Loading fixtures/cases.json…</p>
+      </header>
+
+      <section class="summary" id="summary"></section>
+      <section class="cards" id="cards"></section>
+    </main>
+
+    <template id="card-template">
+      <article class="card">
+        <div class="card-head">
+          <h2></h2>
+          <span class="count"></span>
+        </div>
+        <div class="card-body"></div>
+      </article>
+    </template>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>

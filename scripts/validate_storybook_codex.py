@@ -12,6 +12,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 CASES_PATH = ROOT / "fixtures" / "cases.json"
+SKILL_SCRIPTS = ROOT / "skills" / "storybook-codex" / "scripts"
 
 REQUIRED_PATHS = [
     ROOT / ".codex-plugin" / "plugin.json",
@@ -24,22 +25,36 @@ REQUIRED_PATHS = [
     ROOT / "skills" / "storybook-codex" / "references" / "story-design-lenses.md",
     ROOT / "skills" / "storybook-codex" / "references" / "controls-and-autodocs.md",
     ROOT / "skills" / "storybook-codex" / "references" / "chromatic.md",
-    ROOT / "skills" / "storybook-codex" / "scripts" / "story_blueprint.py",
+    ROOT / "skills" / "storybook-codex" / "references" / "visual-diff.md",
+    ROOT / "skills" / "storybook-codex" / "references" / "interaction-stories.md",
+    ROOT / "skills" / "storybook-codex" / "references" / "accessibility-stories.md",
+    ROOT / "skills" / "storybook-codex" / "references" / "design-tokens.md",
+    ROOT / "skills" / "storybook-codex" / "references" / "multi-framework-sync.md",
+    ROOT / "skills" / "storybook-codex" / "references" / "component-library-patterns.md",
+    ROOT / "skills" / "storybook-codex" / "references" / "storybook-9-readiness.md",
+    ROOT / "skills" / "storybook-codex" / "references" / "storybook-audit.md",
+    SKILL_SCRIPTS / "storybook_codex_lib.py",
+    SKILL_SCRIPTS / "story_blueprint.py",
+    SKILL_SCRIPTS / "storybook_audit.py",
+    SKILL_SCRIPTS / "story_sync.py",
+    SKILL_SCRIPTS / "token_catalog.py",
     ROOT / "skills" / "storybook-codex" / "assets" / "storybook-codex-small.svg",
     ROOT / "skills" / "storybook-codex" / "assets" / "storybook-codex-logo.svg",
     ROOT / "skills" / "storybook-codex" / "assets" / "templates" / "component.stories.tsx",
     ROOT / "skills" / "storybook-codex" / "assets" / "templates" / "component.vue.stories.ts",
     ROOT / "skills" / "storybook-codex" / "assets" / "templates" / "component.svelte.stories.svelte",
+    ROOT / "skills" / "storybook-codex" / "assets" / "templates" / "component.interaction.stories.tsx",
+    ROOT / "skills" / "storybook-codex" / "assets" / "templates" / "visual-regression.spec.ts",
     ROOT / "skills" / "storybook-codex" / "assets" / "templates" / ".storybook" / "preview.ts",
+    ROOT / "skills" / "storybook-codex" / "assets" / "templates" / ".storybook" / "token-preview.ts",
     ROOT / "skills" / "storybook-codex" / "assets" / "templates" / "chromatic.config.json",
-    ROOT
-    / "skills"
-    / "storybook-codex"
-    / "assets"
-    / "templates"
-    / ".github"
-    / "workflows"
-    / "chromatic.yml",
+    ROOT / "skills" / "storybook-codex" / "assets" / "templates" / "libraries" / "shadcn-button.stories.tsx",
+    ROOT / "skills" / "storybook-codex" / "assets" / "templates" / "libraries" / "radix-dialog.stories.tsx",
+    ROOT / "skills" / "storybook-codex" / "assets" / "templates" / "libraries" / "headlessui-dialog.stories.tsx",
+    ROOT / "skills" / "storybook-codex" / "assets" / "templates" / ".github" / "workflows" / "chromatic.yml",
+    ROOT / "tools" / "fixtures-viewer" / "index.html",
+    ROOT / "tools" / "fixtures-viewer" / "app.js",
+    ROOT / "tools" / "fixtures-viewer" / "styles.css",
     CASES_PATH,
 ]
 
@@ -51,6 +66,18 @@ def fail(message: str, errors: list[str]) -> None:
     errors.append(message)
 
 
+def run_json(command: list[str], errors: list[str], context: str) -> dict[str, object] | None:
+    result = subprocess.run(command, capture_output=True, text=True, check=False)
+    if result.returncode != 0:
+        fail(f"{context} failed: {result.stdout}{result.stderr}", errors)
+        return None
+    try:
+        return json.loads(result.stdout)
+    except json.JSONDecodeError as exc:
+        fail(f"{context} returned invalid JSON: {exc}", errors)
+        return None
+
+
 def validate_required_paths(errors: list[str]) -> None:
     for path in REQUIRED_PATHS:
         if not path.exists():
@@ -58,17 +85,15 @@ def validate_required_paths(errors: list[str]) -> None:
 
 
 def validate_manifest(errors: list[str]) -> None:
-    manifest_path = ROOT / ".codex-plugin" / "plugin.json"
-    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest = json.loads((ROOT / ".codex-plugin" / "plugin.json").read_text(encoding="utf-8"))
 
     if manifest.get("name") != "storybook-codex":
         fail("plugin.json name must be storybook-codex", errors)
-
     if manifest.get("skills") != "./skills/":
         fail("plugin.json skills path must be ./skills/", errors)
 
     keywords = set(manifest.get("keywords", []))
-    for keyword in ("react", "vue", "svelte", "storybook"):
+    for keyword in ("react", "vue", "svelte", "storybook", "chromatic"):
         if keyword not in keywords:
             fail(f"plugin.json keywords must include {keyword}", errors)
 
@@ -82,205 +107,271 @@ def validate_manifest(errors: list[str]) -> None:
 
 
 def validate_skill_metadata(errors: list[str]) -> None:
-    skill_path = ROOT / "skills" / "storybook-codex" / "SKILL.md"
-    skill_text = skill_path.read_text(encoding="utf-8")
-
-    if "name: storybook-codex" not in skill_text:
-        fail("SKILL.md frontmatter must include name: storybook-codex", errors)
+    skill_text = (ROOT / "skills" / "storybook-codex" / "SKILL.md").read_text(encoding="utf-8")
 
     for phrase in (
+        "name: storybook-codex",
         "Create or update React, Vue, and Svelte Storybook stories",
         ".stories.svelte",
         ".stories.tsx",
+        "triggers:",
+        "story_blueprint.py",
+        "storybook_audit.py",
+        "story_sync.py",
+        "token_catalog.py",
+        "visual-regression-codex",
     ):
         if phrase not in skill_text:
-            fail(f"SKILL.md is missing framework routing phrase: {phrase}", errors)
+            fail(f"SKILL.md is missing required guidance: {phrase}", errors)
 
-    openai_yaml = (
-        ROOT / "skills" / "storybook-codex" / "agents" / "openai.yaml"
-    ).read_text(encoding="utf-8")
-    if "display_name: \"Storybook Codex\"" not in openai_yaml:
-        fail("agents/openai.yaml display_name is missing or wrong", errors)
-    if "$storybook-codex" not in openai_yaml:
-        fail("agents/openai.yaml default prompt must mention $storybook-codex", errors)
-    if "React, Vue, and Svelte" not in openai_yaml:
-        fail("agents/openai.yaml should mention React, Vue, and Svelte", errors)
-    if "icon_small: \"./assets/storybook-codex-small.svg\"" not in openai_yaml:
-        fail("agents/openai.yaml icon_small is missing or wrong", errors)
-    if "icon_large: \"./assets/storybook-codex-logo.svg\"" not in openai_yaml:
-        fail("agents/openai.yaml icon_large is missing or wrong", errors)
+    openai_yaml = (ROOT / "skills" / "storybook-codex" / "agents" / "openai.yaml").read_text(encoding="utf-8")
+    for phrase in (
+        'display_name: "Storybook Codex"',
+        "$storybook-codex",
+        "React, Vue, and Svelte",
+        'icon_small: "./assets/storybook-codex-small.svg"',
+        'icon_large: "./assets/storybook-codex-logo.svg"',
+    ):
+        if phrase not in openai_yaml:
+            fail(f"agents/openai.yaml is missing required content: {phrase}", errors)
 
 
-def validate_csf_story_file(
-    story_path: Path,
-    required_stories: list[str],
-    required_markers: list[str],
-    errors: list[str],
-) -> None:
-    text = story_path.read_text(encoding="utf-8")
+def validate_text_file(path: Path, required_markers: list[str], errors: list[str]) -> None:
+    text = path.read_text(encoding="utf-8")
+    for marker in required_markers:
+        if marker not in text:
+            fail(f"{path.relative_to(ROOT)} is missing expected content: {marker}", errors)
+
+
+def validate_csf_story_file(path: Path, required_stories: list[str], required_markers: list[str], errors: list[str]) -> None:
+    text = path.read_text(encoding="utf-8")
     found_story_names = STORY_NAME_RE.findall(text)
 
-    for marker in (
-        "Meta",
-        "StoryObj",
-        "export default meta",
-        "type Story = StoryObj<typeof meta>;",
-    ):
+    for marker in ("Meta", "StoryObj", "export default meta", "type Story = StoryObj<typeof meta>;"):
         if marker not in text:
-            fail(f"{story_path.relative_to(ROOT)} is missing marker: {marker}", errors)
+            fail(f"{path.relative_to(ROOT)} is missing marker: {marker}", errors)
 
-    if "Template.bind" in text:
-        fail(f"{story_path.relative_to(ROOT)} still contains Template.bind", errors)
-
-    if "ComponentStory" in text or "ComponentMeta" in text:
-        fail(
-            f"{story_path.relative_to(ROOT)} still uses old Storybook utility types",
-            errors,
-        )
-
-    if not found_story_names:
-        fail(f"{story_path.relative_to(ROOT)} exports no named stories", errors)
+    if "Template.bind" in text or "ComponentStory" in text or "ComponentMeta" in text:
+        fail(f"{path.relative_to(ROOT)} still uses legacy Storybook syntax", errors)
+    if "@storybook/test" in text:
+        fail(f"{path.relative_to(ROOT)} still imports @storybook/test", errors)
 
     for story_name in required_stories:
         if story_name not in found_story_names:
-            fail(
-                f"{story_path.relative_to(ROOT)} is missing story export: {story_name}",
-                errors,
-            )
+            fail(f"{path.relative_to(ROOT)} is missing story export: {story_name}", errors)
 
-    for marker in required_markers:
-        if marker not in text:
-            fail(
-                f"{story_path.relative_to(ROOT)} is missing expected content: {marker}",
-                errors,
-            )
+    validate_text_file(path, required_markers, errors)
 
 
-def validate_svelte_story_file(
-    story_path: Path,
-    required_stories: list[str],
-    required_markers: list[str],
-    errors: list[str],
-) -> None:
-    text = story_path.read_text(encoding="utf-8")
+def validate_svelte_story_file(path: Path, required_stories: list[str], required_markers: list[str], errors: list[str]) -> None:
+    text = path.read_text(encoding="utf-8")
     found_story_names = SVELTE_STORY_NAME_RE.findall(text)
 
     for marker in ("defineMeta", "<Story", "tags: ['autodocs']"):
         if marker not in text:
-            fail(f"{story_path.relative_to(ROOT)} is missing marker: {marker}", errors)
-
+            fail(f"{path.relative_to(ROOT)} is missing marker: {marker}", errors)
     if "<Meta" in text or "<Template" in text:
-        fail(f"{story_path.relative_to(ROOT)} still uses deprecated Svelte story blocks", errors)
-
-    if not found_story_names:
-        fail(f"{story_path.relative_to(ROOT)} exports no named stories", errors)
+        fail(f"{path.relative_to(ROOT)} still uses deprecated Svelte story blocks", errors)
 
     for story_name in required_stories:
         if story_name not in found_story_names:
-            fail(
-                f"{story_path.relative_to(ROOT)} is missing story export: {story_name}",
-                errors,
-            )
+            fail(f"{path.relative_to(ROOT)} is missing story export: {story_name}", errors)
 
-    for marker in required_markers:
-        if marker not in text:
-            fail(
-                f"{story_path.relative_to(ROOT)} is missing expected content: {marker}",
-                errors,
-            )
+    validate_text_file(path, required_markers, errors)
 
 
-def validate_cases(errors: list[str]) -> None:
-    cases = json.loads(CASES_PATH.read_text(encoding="utf-8"))
-
+def validate_story_like_cases(cases: dict[str, object], errors: list[str]) -> None:
     for section_name in ("stories", "templates"):
         for case in cases.get(section_name, []):
-            story_path = ROOT / case["story"]
-            if not story_path.exists():
-                fail(f"Missing story fixture: {case['story']}", errors)
+            path = ROOT / case["story"]
+            if not path.exists():
+                fail(f"Missing artifact: {case['story']}", errors)
                 continue
             format_name = case.get("format", "csf")
             if format_name == "csf":
-                validate_csf_story_file(
-                    story_path=story_path,
-                    required_stories=case.get("requiredStories", []),
-                    required_markers=case.get("requiredMarkers", []),
-                    errors=errors,
-                )
+                validate_csf_story_file(path, case.get("requiredStories", []), case.get("requiredMarkers", []), errors)
             elif format_name == "svelte-csf":
-                validate_svelte_story_file(
-                    story_path=story_path,
-                    required_stories=case.get("requiredStories", []),
-                    required_markers=case.get("requiredMarkers", []),
-                    errors=errors,
-                )
+                validate_svelte_story_file(path, case.get("requiredStories", []), case.get("requiredMarkers", []), errors)
+            elif format_name == "text":
+                validate_text_file(path, case.get("requiredMarkers", []), errors)
             else:
-                fail(f"Unknown story validation format: {format_name}", errors)
+                fail(f"Unknown validation format: {format_name}", errors)
 
-    blueprint_script = ROOT / "skills" / "storybook-codex" / "scripts" / "story_blueprint.py"
+
+def validate_blueprints(cases: dict[str, object], errors: list[str]) -> None:
+    blueprint_script = SKILL_SCRIPTS / "story_blueprint.py"
     for case in cases.get("blueprints", []):
-        component_path = ROOT / case["component"]
+        command = [sys.executable, str(blueprint_script), str(ROOT / case["component"])]
+        if case.get("repoRoot"):
+            command.extend(["--repo-root", str(ROOT / case["repoRoot"])])
+        blueprint = run_json(command, errors, f"Blueprint {case['name']}")
+        if blueprint is None:
+            continue
+
+        story_names = [story["name"] for story in blueprint.get("stories", [])]
+        notes = "\n".join(blueprint.get("notes", []))
+        controls = blueprint.get("controls", {})
+        usage_props = [item["prop"] for item in blueprint.get("usageSignals", {}).get("props", [])]
+        interaction_names = [item["storyName"] for item in blueprint.get("interactionStories", [])]
+        a11y_names = [item["storyName"] for item in blueprint.get("accessibilityStories", [])]
+        visual_stories = blueprint.get("visualDiff", {}).get("captureStories", [])
+
+        for expected_story in case.get("expectedStories", []):
+            if expected_story not in story_names:
+                fail(f"Blueprint {case['name']} is missing story recommendation: {expected_story}", errors)
+        for expected_note in case.get("expectedNotes", []):
+            if expected_note not in notes:
+                fail(f"Blueprint {case['name']} is missing note content: {expected_note}", errors)
+        for hidden_prop in case.get("expectedHiddenProps", []):
+            if controls.get(hidden_prop, {}).get("table", {}).get("disable") is not True:
+                fail(f"Blueprint {case['name']} should hide prop: {hidden_prop}", errors)
+        for usage_prop in case.get("expectedUsageProps", []):
+            if usage_prop not in usage_props:
+                fail(f"Blueprint {case['name']} is missing usage signal: {usage_prop}", errors)
+        for story_name in case.get("expectedInteractionStories", []):
+            if story_name not in interaction_names:
+                fail(f"Blueprint {case['name']} is missing interaction story: {story_name}", errors)
+        for story_name in case.get("expectedA11yStories", []):
+            if story_name not in a11y_names:
+                fail(f"Blueprint {case['name']} is missing accessibility story: {story_name}", errors)
+        for story_name in case.get("expectedVisualStories", []):
+            if story_name not in visual_stories:
+                fail(f"Blueprint {case['name']} is missing visual capture story: {story_name}", errors)
+
+
+def validate_reviews(cases: dict[str, object], errors: list[str]) -> None:
+    blueprint_script = SKILL_SCRIPTS / "story_blueprint.py"
+    for case in cases.get("reviews", []):
+        review = run_json(
+            [
+                sys.executable,
+                str(blueprint_script),
+                str(ROOT / case["component"]),
+                "--review-story",
+                str(ROOT / case["story"]),
+            ],
+            errors,
+            f"Review {case['name']}",
+        )
+        if review is None:
+            continue
+
+        if review.get("score", 0) < case.get("minimumScore", 0):
+            fail(f"Review {case['name']} scored below the minimum threshold", errors)
+        issue_codes = {issue["code"] for issue in review.get("issues", [])}
+        for expected_code in case.get("expectedIssueCodes", []):
+            if expected_code not in issue_codes:
+                fail(f"Review {case['name']} is missing issue code: {expected_code}", errors)
+
+
+def validate_audits(cases: dict[str, object], errors: list[str]) -> None:
+    audit_script = SKILL_SCRIPTS / "storybook_audit.py"
+    for case in cases.get("audits", []):
+        audit = run_json(
+            [sys.executable, str(audit_script), str(ROOT / case["path"])],
+            errors,
+            f"Audit {case['name']}",
+        )
+        if audit is None:
+            continue
+
+        if audit.get("averageScore", 0) < case.get("minimumAverageScore", 0):
+            fail(f"Audit {case['name']} average score is below the minimum threshold", errors)
+        missing = set(audit.get("missingComponents", []))
+        for expected in case.get("expectedMissingComponents", []):
+            if expected not in missing:
+                fail(f"Audit {case['name']} is missing uncovered component: {expected}", errors)
+        component_names = {component["component"] for component in audit.get("components", [])}
+        for expected in case.get("expectedComponents", []):
+            if expected not in component_names:
+                fail(f"Audit {case['name']} is missing component report: {expected}", errors)
+
+
+def validate_token_catalogs(cases: dict[str, object], errors: list[str]) -> None:
+    token_script = SKILL_SCRIPTS / "token_catalog.py"
+    for case in cases.get("tokenCatalogs", []):
+        catalog = run_json(
+            [sys.executable, str(token_script), str(ROOT / case["path"])],
+            errors,
+            f"Token catalog {case['name']}",
+        )
+        if catalog is None:
+            continue
+
+        token_names = {token["name"] for token in catalog.get("tokens", [])}
+        global_names = {item["name"] for item in catalog.get("globals", [])}
+        preview_snippet = str(catalog.get("previewSnippet", ""))
+
+        for expected in case.get("expectedTokenNames", []):
+            if expected not in token_names:
+                fail(f"Token catalog {case['name']} is missing token: {expected}", errors)
+        for expected in case.get("expectedGlobals", []):
+            if expected not in global_names:
+                fail(f"Token catalog {case['name']} is missing global: {expected}", errors)
+        for expected in case.get("expectedPreviewMarkers", []):
+            if expected not in preview_snippet:
+                fail(f"Token catalog {case['name']} preview snippet is missing: {expected}", errors)
+
+
+def validate_syncs(cases: dict[str, object], errors: list[str]) -> None:
+    sync_script = SKILL_SCRIPTS / "story_sync.py"
+    for case in cases.get("syncs", []):
         result = subprocess.run(
-            [sys.executable, str(blueprint_script), str(component_path)],
+            [
+                sys.executable,
+                str(sync_script),
+                str(ROOT / case["source"]),
+                "--target",
+                case["target"],
+                "--component-name",
+                case["componentName"],
+                "--component-import",
+                case["componentImport"],
+            ],
             capture_output=True,
             text=True,
             check=False,
         )
         if result.returncode != 0:
-            fail(f"Blueprint script failed for {case['name']}: {result.stdout}{result.stderr}", errors)
+            fail(f"Sync {case['name']} failed: {result.stdout}{result.stderr}", errors)
             continue
+        for marker in case.get("requiredMarkers", []):
+            if marker not in result.stdout:
+                fail(f"Sync {case['name']} is missing expected content: {marker}", errors)
 
-        try:
-            blueprint = json.loads(result.stdout)
-        except json.JSONDecodeError as exc:
-            fail(f"Blueprint output for {case['name']} is not valid JSON: {exc}", errors)
-            continue
 
-        story_names = [story["name"] for story in blueprint.get("stories", [])]
-        for expected_story in case.get("expectedStories", []):
-            if expected_story not in story_names:
-                fail(f"Blueprint {case['name']} is missing story recommendation: {expected_story}", errors)
+def validate_viewer(errors: list[str]) -> None:
+    viewer_js = (ROOT / "tools" / "fixtures-viewer" / "app.js").read_text(encoding="utf-8")
+    for marker in ("fixtures/cases.json", "Load local JSON", "renderContract"):
+        if marker not in viewer_js and marker not in (ROOT / "tools" / "fixtures-viewer" / "index.html").read_text(encoding="utf-8"):
+            fail(f"Fixtures viewer is missing expected content: {marker}", errors)
 
-        notes = "\n".join(blueprint.get("notes", []))
-        for expected_note in case.get("expectedNotes", []):
-            if expected_note not in notes:
-                fail(f"Blueprint {case['name']} is missing note content: {expected_note}", errors)
 
-        controls = blueprint.get("controls", {})
-        for hidden_prop in case.get("expectedHiddenProps", []):
-            control = controls.get(hidden_prop, {})
-            if control.get("table", {}).get("disable") is not True:
-                fail(f"Blueprint {case['name']} should hide prop: {hidden_prop}", errors)
-
-        markdown_markers = case.get("expectedMarkdownMarkers", [])
-        if markdown_markers:
-            md_result = subprocess.run(
-                [sys.executable, str(blueprint_script), str(component_path), "--format", "markdown"],
-                capture_output=True,
-                text=True,
-                check=False,
-            )
-            if md_result.returncode != 0:
-                fail(
-                    f"Blueprint markdown run failed for {case['name']}: "
-                    f"{md_result.stdout}{md_result.stderr}",
-                    errors,
-                )
-                continue
-            md_output = md_result.stdout
-            for marker in markdown_markers:
-                if marker not in md_output:
-                    fail(
-                        f"Blueprint {case['name']} markdown is missing marker: {marker}",
-                        errors,
-                    )
+def validate_watch_mode(errors: list[str]) -> None:
+    blueprint_script = SKILL_SCRIPTS / "story_blueprint.py"
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(blueprint_script),
+            str(ROOT / "fixtures" / "basic-button" / "Button.tsx"),
+            "--watch",
+            "--max-runs",
+            "1",
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        fail(f"Watch mode failed: {result.stdout}{result.stderr}", errors)
+        return
+    if '"component": "Button"' not in result.stdout:
+        fail("Watch mode did not emit the expected initial blueprint payload", errors)
 
 
 def main() -> int:
     errors: list[str] = []
-
     validate_required_paths(errors)
-
     if errors:
         for error in errors:
             print(f"[FAIL] {error}")
@@ -288,7 +379,16 @@ def main() -> int:
 
     validate_manifest(errors)
     validate_skill_metadata(errors)
-    validate_cases(errors)
+
+    cases = json.loads(CASES_PATH.read_text(encoding="utf-8"))
+    validate_story_like_cases(cases, errors)
+    validate_blueprints(cases, errors)
+    validate_reviews(cases, errors)
+    validate_audits(cases, errors)
+    validate_token_catalogs(cases, errors)
+    validate_syncs(cases, errors)
+    validate_viewer(errors)
+    validate_watch_mode(errors)
 
     if errors:
         for error in errors:

@@ -9,7 +9,8 @@
         "tags: ['autodocs']",
         "control: 'radio'",
         "control: 'inline-radio'",
-        "onClick: fn()"
+        "onClick: fn()",
+        "storybook/test"
       ]
     },
     {
@@ -21,7 +22,8 @@
         "tags: ['autodocs']",
         "control: 'inline-radio'",
         "table: {",
-        "onDismiss: fn()"
+        "onDismiss: fn()",
+        "storybook/test"
       ]
     },
     {
@@ -81,6 +83,7 @@
       "requiredMarkers": [
         "__COMPONENT_NAME__",
         "__COMPONENT_IMPORT_PATH__",
+        "storybook/test",
         "tags: ['autodocs']"
       ]
     },
@@ -109,82 +112,182 @@
         "@storybook/addon-svelte-csf",
         "tags: ['autodocs']"
       ]
+    },
+    {
+      "name": "interaction-template",
+      "format": "text",
+      "story": "skills/storybook-codex/assets/templates/component.interaction.stories.tsx",
+      "requiredMarkers": [
+        "storybook/test",
+        "ClickFlow",
+        "a11y",
+        "chromatic"
+      ]
+    },
+    {
+      "name": "visual-regression-template",
+      "format": "text",
+      "story": "skills/storybook-codex/assets/templates/visual-regression.spec.ts",
+      "requiredMarkers": [
+        "@playwright/test",
+        "toHaveScreenshot",
+        "STORYBOOK_URL"
+      ]
+    },
+    {
+      "name": "token-preview-template",
+      "format": "text",
+      "story": "skills/storybook-codex/assets/templates/.storybook/token-preview.ts",
+      "requiredMarkers": [
+        "globalTypes",
+        "theme",
+        "density"
+      ]
+    },
+    {
+      "name": "shadcn-template",
+      "format": "text",
+      "story": "skills/storybook-codex/assets/templates/libraries/shadcn-button.stories.tsx",
+      "requiredMarkers": [
+        "asChild",
+        "storybook/test",
+        "Pressed"
+      ]
+    },
+    {
+      "name": "radix-template",
+      "format": "text",
+      "story": "skills/storybook-codex/assets/templates/libraries/radix-dialog.stories.tsx",
+      "requiredMarkers": [
+        "Dialog.Root",
+        "chromatic",
+        "Opened"
+      ]
+    },
+    {
+      "name": "headlessui-template",
+      "format": "text",
+      "story": "skills/storybook-codex/assets/templates/libraries/headlessui-dialog.stories.tsx",
+      "requiredMarkers": [
+        "DialogBackdrop",
+        "FocusTrap",
+        "storybook/test"
+      ]
     }
   ],
   "blueprints": [
     {
       "name": "button-blueprint",
       "component": "fixtures/basic-button/Button.tsx",
+      "repoRoot": "fixtures/basic-button",
       "expectedStories": ["Default", "Brand", "Disabled", "Loading", "LongContent"],
       "expectedNotes": [
-        "Use fn() for event handlers",
-        "Prefer one or two decision stories"
+        "Use fn() from storybook/test",
+        "Bias stories toward prop combinations already used together in the app."
       ],
       "expectedHiddenProps": [],
-      "expectedMarkdownMarkers": [
-        "# Button blueprint",
-        "_Framework_: react",
-        "## Props",
-        "`onClick`: `() => void` _(event)_",
-        "## Default args",
-        "## Controls",
-        "\"useFn\": true",
-        "## Recommended stories",
-        "- Default (baseline)",
-        "## Notes"
-      ]
+      "expectedUsageProps": ["size", "tone", "onClick"],
+      "expectedInteractionStories": ["ClickFlow"],
+      "expectedA11yStories": ["BusyAndDisabledStates"],
+      "expectedVisualStories": ["Default", "Brand"]
     },
     {
       "name": "alert-blueprint",
       "component": "fixtures/alert/Alert.tsx",
-      "expectedStories": ["Default", "Success", "Danger", "Dismissible", "LongContent"],
+      "expectedStories": ["Default", "Danger", "Dismissible", "LongContent"],
       "expectedNotes": [
-        "Use fn() for event handlers",
+        "Use fn() from storybook/test",
         "Hide internal props from docs tables and controls: className."
       ],
-      "expectedHiddenProps": ["className"]
+      "expectedHiddenProps": ["className"],
+      "expectedInteractionStories": ["DismissFlow"],
+      "expectedA11yStories": ["ScreenReaderSummary", "KeyboardDismiss"]
     },
     {
       "name": "vue-info-panel-blueprint",
       "component": "fixtures/vue-info-panel/InfoPanel.vue",
-      "expectedStories": ["Default", "Success", "Danger", "Compact", "LongContent"],
-      "expectedNotes": [
-        "Hide internal props from docs tables and controls: className.",
-        "Prefer one or two decision stories"
-      ],
-      "expectedHiddenProps": ["className"]
-    },
-    {
-      "name": "svelte-status-pill-blueprint",
-      "component": "fixtures/svelte-status-pill/StatusPill.svelte",
-      "expectedStories": ["Default", "Brand", "Danger", "Selected", "Compact", "LongContent"],
-      "expectedNotes": [
-        "Prefer one or two decision stories"
-      ],
-      "expectedHiddenProps": []
-    },
-    {
-      "name": "theme-badge-blueprint",
-      "component": "fixtures/theme-badge/ThemeBadge.tsx",
-      "expectedStories": ["Default", "Dark", "Light", "Selected", "Compact", "LongContent"],
+      "expectedStories": ["Default", "Danger", "Compact", "LongContent"],
       "expectedNotes": [
         "Hide internal props from docs tables and controls: className.",
         "Prefer one or two decision stories"
       ],
       "expectedHiddenProps": ["className"],
-      "expectedMarkdownMarkers": [
-        "# ThemeBadge blueprint",
-        "`className`: `string` _(hidden)_"
-      ]
+      "expectedA11yStories": ["ScreenReaderSummary"]
     },
     {
-      "name": "badge-component-blueprint",
+      "name": "svelte-status-pill-blueprint",
+      "component": "fixtures/svelte-status-pill/StatusPill.svelte",
+      "expectedStories": ["Default", "Brand", "Selected", "Compact", "LongContent"],
+      "expectedNotes": [
+        "Prefer one or two decision stories"
+      ],
+      "expectedHiddenProps": [],
+      "expectedA11yStories": ["FieldNarration"]
+    },
+    {
+      "name": "theme-badge-blueprint",
+      "component": "fixtures/theme-badge/ThemeBadge.tsx",
+      "repoRoot": "fixtures/theme-badge",
+      "expectedStories": ["Default", "Dark", "Light", "Selected", "Compact", "LongContent"],
+      "expectedNotes": [
+        "Hide internal props from docs tables and controls: className.",
+        "Bias stories toward prop combinations already used together in the app."
+      ],
+      "expectedHiddenProps": ["className"],
+      "expectedUsageProps": ["theme", "selected", "compact"],
+      "expectedA11yStories": ["FieldNarration"],
+      "expectedVisualStories": ["Dark", "Light"]
+    },
+    {
+      "name": "existing-story-badge-blueprint",
       "component": "fixtures/existing-story/Badge.tsx",
       "expectedStories": ["Default", "Solid", "LongContent"],
       "expectedNotes": [
         "Prefer one or two decision stories"
       ],
       "expectedHiddenProps": []
+    }
+  ],
+  "reviews": [
+    {
+      "name": "alert-review",
+      "component": "fixtures/alert/Alert.tsx",
+      "story": "fixtures/alert/Alert.expected.stories.tsx",
+      "minimumScore": 80,
+      "expectedIssueCodes": ["missing-a11y", "missing-visual-regression"]
+    }
+  ],
+  "audits": [
+    {
+      "name": "audit-sample",
+      "path": "fixtures/audit-sample",
+      "minimumAverageScore": 85,
+      "expectedMissingComponents": ["components/UncoveredCard.tsx"],
+      "expectedComponents": ["CheckoutButton", "Notice"]
+    }
+  ],
+  "tokenCatalogs": [
+    {
+      "name": "token-source",
+      "path": "fixtures/token-source",
+      "expectedTokenNames": ["theme-surface-dark", "density-compact", "radius-card"],
+      "expectedGlobals": ["theme", "density"],
+      "expectedPreviewMarkers": ["globalTypes", "theme", "density"]
+    }
+  ],
+  "syncs": [
+    {
+      "name": "checkout-button-svelte-sync",
+      "source": "fixtures/audit-sample/components/CheckoutButton.stories.tsx",
+      "target": "svelte",
+      "componentName": "CheckoutButton",
+      "componentImport": "./CheckoutButton.svelte",
+      "requiredMarkers": [
+        "defineMeta",
+        "storybook/test",
+        "play={ClickFlowPlay}",
+        "args={{"
+      ]
     }
   ]
 }

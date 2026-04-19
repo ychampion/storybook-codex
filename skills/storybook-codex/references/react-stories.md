@@ -38,6 +38,7 @@ export const Disabled: Story = {
 - Keep shared defaults in `meta.args`.
 - Keep named stories small and legible.
 - Favor 3 to 6 good stories over exhaustive matrices.
+- Prefer `storybook/test` for `fn`, `userEvent`, `within`, and `expect` when the story needs actions or a `play()` flow.
 
 ## Story selection
 
@@ -46,6 +47,7 @@ Use the component API to decide which stories matter:
 - one baseline story
 - one or two visual variants such as size, tone, or theme
 - one or two state variants such as disabled, loading, selected, error, or dismissible
+- one interaction story when the component has a meaningful event flow
 
 Avoid generating stories for:
 
@@ -59,4 +61,3 @@ Avoid generating stories for:
 - Preserve useful `parameters`, `decorators`, `play`, and `loaders`.
 - Replace `Template.bind({})` only when you are already touching the file.
 - Do not delete working docs blocks or test hooks just to make the file look generic.
-

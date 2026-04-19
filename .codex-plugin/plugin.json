@@ -1,7 +1,7 @@
 {
   "name": "storybook-codex",
-  "version": "0.2.0",
-  "description": "Plugin-ready Codex skill for creating and updating React, Vue, and Svelte Storybook stories with controls, autodocs, and optional Chromatic scaffolding.",
+  "version": "0.4.0",
+  "description": "Plugin-ready Codex skill for creating, reviewing, syncing, and auditing React, Vue, and Svelte Storybook stories with controls, play() flows, design-token globals, and visual QA hooks.",
   "author": {
     "name": "YChampion",
     "url": "https://github.com/ychampion"
@@ -22,7 +22,7 @@
   "interface": {
     "displayName": "Storybook Codex",
     "shortDescription": "Generate Storybook stories for React, Vue, and Svelte.",
-    "longDescription": "A focused Codex skill for creating and updating React, Vue, and Svelte Storybook stories using modern framework-aware story formats, selective controls, autodocs tags, and optional Chromatic setup.",
+    "longDescription": "A focused Codex skill for creating, reviewing, and auditing React, Vue, and Svelte Storybook stories using framework-aware story formats, selective controls, autodocs tags, interaction tests, token-aware globals, and optional Chromatic or Playwright visual coverage.",
     "developerName": "YChampion",
     "category": "Productivity",
     "capabilities": [
@@ -35,8 +35,9 @@
       "Use $storybook-codex to create stories for src/components/Button.tsx.",
       "Use $storybook-codex to create stories for src/components/InfoPanel.vue.",
       "Use $storybook-codex to create native Svelte stories for src/lib/StatusPill.svelte.",
-      "Use $storybook-codex to update existing stories to StoryObj and autodocs.",
-      "Use $storybook-codex to scaffold Chromatic for this Storybook project."
+      "Use $storybook-codex to update existing stories to StoryObj, play(), and autodocs.",
+      "Use $storybook-codex to audit Storybook health in this repo.",
+      "Use $storybook-codex to scaffold Chromatic or local visual regression for this Storybook project."
     ],
     "brandColor": "#F05A28",
     "composerIcon": "./skills/storybook-codex/assets/storybook-codex-small.svg",

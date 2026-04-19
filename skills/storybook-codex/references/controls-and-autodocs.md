@@ -34,12 +34,12 @@ argTypes: {
 
 ## Event handlers
 
-Prefer `fn()` from `@storybook/test` for function props that should be callable in the canvas.
+Prefer `fn()` from `storybook/test` for function props that should be callable in the canvas.
 
 Example:
 
 ```ts
-import { fn } from '@storybook/test';
+import { fn } from 'storybook/test';
 
 args: {
   onClick: fn(),
@@ -52,6 +52,19 @@ argTypes: {
 ```
 
 Do not expose raw function props as editable text-like controls.
+
+## Interaction stories
+
+When a component has a real event surface, prefer one named interaction story over bare action logging.
+
+Use `play()` with `userEvent`, `within`, and `expect` from `storybook/test` for:
+
+- submit flows
+- open and close flows
+- dismiss or acknowledge actions
+- focus management checks
+
+If the interaction changes layout or visibility, add visual coverage for that same story in Chromatic or a local screenshot spec.
 
 ## Autodocs
 
@@ -68,4 +81,3 @@ Hide props that make the docs table worse instead of better:
 - test IDs
 - internal render hooks
 - props the component inherits but the team does not document
-
