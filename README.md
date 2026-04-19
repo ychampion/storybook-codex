@@ -4,6 +4,10 @@
 
 A Storybook Codex is a focused Codex skill that understands Storybook workflows and helps teams generate, update, document, and review component stories across a repo instead of only writing a single `.stories.tsx` file.
 
+![Storybook Codex demo — live stories for React, Vue, and Svelte fixtures](demo/storybook-codex.gif)
+
+> Zero-build demo cycling through the six repo fixtures. Each card is a named `Story` export rendered with its own `args`. Run `python demo/build.py && python -m http.server 8765 --directory demo` to drive it locally.
+
 It gives Codex one focused skill that can:
 
 - create or update React, Vue, and Svelte Storybook stories
