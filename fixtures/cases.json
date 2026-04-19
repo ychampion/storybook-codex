@@ -120,7 +120,19 @@
         "Use fn() for event handlers",
         "Prefer one or two decision stories"
       ],
-      "expectedHiddenProps": []
+      "expectedHiddenProps": [],
+      "expectedMarkdownMarkers": [
+        "# Button blueprint",
+        "_Framework_: react",
+        "## Props",
+        "`onClick`: `() => void` _(event)_",
+        "## Default args",
+        "## Controls",
+        "\"useFn\": true",
+        "## Recommended stories",
+        "- Default (baseline)",
+        "## Notes"
+      ]
     },
     {
       "name": "alert-blueprint",
@@ -159,10 +171,14 @@
         "Hide internal props from docs tables and controls: className.",
         "Prefer one or two decision stories"
       ],
-      "expectedHiddenProps": ["className"]
+      "expectedHiddenProps": ["className"],
+      "expectedMarkdownMarkers": [
+        "# ThemeBadge blueprint",
+        "`className`: `string` _(hidden)_"
+      ]
     },
     {
-      "name": "existing-story-badge-blueprint",
+      "name": "badge-component-blueprint",
       "component": "fixtures/existing-story/Badge.tsx",
       "expectedStories": ["Default", "Solid", "LongContent"],
       "expectedNotes": [
