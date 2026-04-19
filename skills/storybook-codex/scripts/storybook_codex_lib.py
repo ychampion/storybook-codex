@@ -52,6 +52,17 @@ CHROMATIC_RE = re.compile(r"\bchromatic\b|toMatchScreenshot|postVisit|preVisit")
 A11Y_RE = re.compile(r"\ba11y\b|addon-a11y|wcag|axe")
 LEGACY_STORY_RE = re.compile(r"Template\.bind|ComponentStory|ComponentMeta")
 PARAMETERS_A11Y_RE = re.compile(r"parameters\s*:\s*{[^}]*a11y", re.DOTALL)
+USAGE_ATTR_RE = re.compile(
+    r"(?:^|\s)(?P<marker>[:@]?)(?P<name>[A-Za-z_][A-Za-z0-9:_-]*)(?:\s*=\s*(?P<value>\{[^{}]*\}|\"[^\"]*\"|'[^']*'|`[^`]*`))?"
+)
+DECLARATION_RE = re.compile(
+    r"(?:export\s+)?(?:default\s+)?(?:function|const|class)\s+(?P<name>[A-Z][A-Za-z0-9_]*)"
+)
+JSX_COMPONENT_RE = re.compile(r"<(?P<name>[A-Z][A-Za-z0-9_.]*)\b")
+SEMANTIC_CONTAINER_RE = re.compile(
+    r"<(?P<name>form|section|article|aside|main|header|footer|nav|fieldset|dialog|table)\b",
+    re.IGNORECASE,
+)
 
 VARIANT_NAMES = {
     "variant",
@@ -123,6 +134,14 @@ IGNORED_SCAN_DIRS = {
     "__pycache__",
 }
 SUPPORTED_SOURCE_SUFFIXES = {".tsx", ".ts", ".jsx", ".js", ".vue", ".svelte", ".mdx"}
+COMPONENT_SUFFIXES = (".tsx", ".ts", ".jsx", ".js", ".vue", ".svelte")
+STORY_SUFFIXES = (
+    ".stories.tsx",
+    ".stories.ts",
+    ".stories.jsx",
+    ".stories.js",
+    ".stories.svelte",
+)
 
 
 def detect_framework(path: Path) -> str:
@@ -417,14 +436,27 @@ def extract_usage_attrs(block: str) -> list[str]:
     return sorted(set(attrs))
 
 
-def extract_component_tag_bodies(text: str, component_name: str) -> list[str]:
-    bodies: list[str] = []
+def is_story_path(path: Path) -> bool:
+    return any(path.name.endswith(suffix) for suffix in STORY_SUFFIXES)
+
+
+def match_story_for_component(component_path: Path) -> Path | None:
+    base_name = component_path.stem
+    for suffix in STORY_SUFFIXES:
+        candidate = component_path.with_name(f"{base_name}{suffix}")
+        if candidate.exists():
+            return candidate
+    return None
+
+
+def extract_component_tag_matches(text: str, component_name: str) -> list[dict[str, object]]:
+    matches: list[dict[str, object]] = []
     needle = f"<{component_name}"
     start = 0
     while True:
         index = text.find(needle, start)
         if index == -1:
-            return bodies
+            return matches
         cursor = index + len(needle)
         depth = 0
         in_string: str | None = None
@@ -447,10 +479,161 @@ def extract_component_tag_bodies(text: str, component_name: str) -> list[str]:
             elif char == "}":
                 depth = max(0, depth - 1)
             elif char == ">" and depth == 0:
-                bodies.append(text[index + len(needle) : cursor])
+                matches.append(
+                    {
+                        "body": text[index + len(needle) : cursor],
+                        "start": index,
+                        "end": cursor + 1,
+                    }
+                )
                 break
             cursor += 1
         start = cursor + 1
+
+
+def extract_component_tag_bodies(text: str, component_name: str) -> list[str]:
+    return [str(match["body"]) for match in extract_component_tag_matches(text, component_name)]
+
+
+def is_expression_binding(raw_value: str | None, marker: str) -> bool:
+    if raw_value is None:
+        return False
+    text = raw_value.strip()
+    if marker == ":" and not (text.startswith(("'", '"', "`")) and text.endswith(("'", '"', "`"))):
+        return True
+    if text.startswith("{") and text.endswith("}"):
+        inner = text[1:-1].strip()
+        if not inner:
+            return False
+        parsed = parse_literal(inner)
+        return isinstance(parsed, str) and parsed == normalize_whitespace(inner) and not inner.startswith(("'", '"', "`"))
+    return False
+
+
+def parse_usage_value(raw_value: str | None, marker: str) -> object | None:
+    if raw_value is None:
+        return True if marker != ":" else None
+    text = raw_value.strip()
+    if text.startswith("{") and text.endswith("}"):
+        return parse_literal(text[1:-1])
+    return parse_literal(text)
+
+
+def extract_usage_argument_map(block: str) -> dict[str, object]:
+    args: dict[str, object] = {}
+    bindings: dict[str, str] = {}
+
+    for match in USAGE_ATTR_RE.finditer(block):
+        marker = match.group("marker") or ""
+        raw_name = match.group("name")
+        raw_value = match.group("value")
+        if marker == "@":
+            continue
+        if raw_name.startswith("v-") or raw_name in {"class", "slot", "key", "ref"}:
+            continue
+        prop_name = kebab_to_camel(raw_name.split(":")[-1])
+        value = parse_usage_value(raw_value, marker)
+        if value is not None:
+            args[prop_name] = value
+        if is_expression_binding(raw_value, marker):
+            bindings[prop_name] = normalize_whitespace((raw_value or "").strip("{}"))
+
+    return {"args": args, "bindings": bindings}
+
+
+def find_enclosing_symbol(text: str, index: int, fallback: str) -> str:
+    matches = [match.group("name") for match in DECLARATION_RE.finditer(text[:index])]
+    if matches:
+        return matches[-1]
+    return fallback
+
+
+def collect_context_components(region: str, component_name: str) -> list[str]:
+    seen: list[str] = []
+    for name in JSX_COMPONENT_RE.findall(region):
+        if name == component_name or name in seen:
+            continue
+        seen.append(name)
+    return seen[:5]
+
+
+def infer_layout_hint(region: str, sibling_components: list[str], semantic_wrappers: list[str]) -> str:
+    lowered = region.lower()
+    if "onsubmit" in lowered or "form" in semantic_wrappers:
+        return "form flow"
+    if "grid" in lowered:
+        return "grid layout"
+    if any(wrapper in {"aside", "section"} for wrapper in semantic_wrappers):
+        return "panel composition"
+    if "dialog" in lowered or "modal" in lowered:
+        return "dialog surface"
+    if sibling_components:
+        return "composed parent layout"
+    return "inline parent context"
+
+
+def collect_composition_stories(component_name: str, component_path: Path, repo_root: Path) -> list[dict[str, object]]:
+    candidates: list[dict[str, object]] = []
+    used_story_names: set[str] = set()
+
+    for candidate in repo_root.rglob("*"):
+        if not candidate.is_file() or candidate.suffix.lower() not in SUPPORTED_SOURCE_SUFFIXES:
+            continue
+        if candidate.resolve() == component_path.resolve():
+            continue
+        if ".expected." in candidate.name or ".before." in candidate.name or is_story_path(candidate):
+            continue
+        if should_skip_scan_path(candidate.relative_to(repo_root)):
+            continue
+
+        text = candidate.read_text(encoding="utf-8", errors="ignore")
+        for match in extract_component_tag_matches(text, component_name):
+            usage = extract_usage_argument_map(str(match["body"]))
+            start = int(match["start"])
+            end = int(match["end"])
+            region = text[max(0, start - 280) : min(len(text), end + 280)]
+            parent_component = find_enclosing_symbol(text, start, candidate.stem)
+            sibling_components = collect_context_components(region, component_name)
+            semantic_wrappers = [wrapper.lower() for wrapper in SEMANTIC_CONTAINER_RE.findall(region)]
+            layout = infer_layout_hint(region, sibling_components, semantic_wrappers)
+
+            story_name = f"In{to_story_name(parent_component)}"
+            if story_name in used_story_names:
+                story_name = f"{story_name}{to_story_name(candidate.stem)}"
+            used_story_names.add(story_name)
+
+            literal_args = {
+                name: value
+                for name, value in usage["args"].items()
+                if name not in usage["bindings"]
+            }
+            confidence = min(
+                95,
+                50
+                + min(len(literal_args) * 10, 20)
+                + min(len(usage["bindings"]) * 5, 10)
+                + (10 if sibling_components else 0)
+                + (5 if semantic_wrappers else 0),
+            )
+
+            candidates.append(
+                {
+                    "storyName": story_name,
+                    "parentComponent": parent_component,
+                    "parentFile": candidate.relative_to(repo_root).as_posix(),
+                    "layout": layout,
+                    "args": literal_args,
+                    "bindings": usage["bindings"],
+                    "siblingComponents": sibling_components,
+                    "wrappers": semantic_wrappers[:3],
+                    "confidence": confidence,
+                }
+            )
+
+    return sorted(
+        candidates,
+        key=lambda item: (-int(item["confidence"]), str(item["parentFile"]), str(item["storyName"])),
+    )[:5]
 
 
 def collect_usage_signals(component_name: str, component_path: Path, repo_root: Path) -> dict[str, object]:
@@ -654,6 +837,7 @@ def build_notes(
     props: list[dict[str, object]],
     usage_signals: dict[str, object],
     branch_signals: list[dict[str, object]],
+    composition_stories: list[dict[str, object]],
 ) -> list[str]:
     notes: list[str] = []
     if any(prop["isEvent"] for prop in props):
@@ -667,6 +851,8 @@ def build_notes(
         notes.append("Bias stories toward prop combinations already used together in the app.")
     if branch_signals:
         notes.append("Props that gate conditional branches deserve explicit state or boundary stories.")
+    if composition_stories:
+        notes.append("Add at least one parent-context story so the component is reviewed where it actually ships.")
     return notes
 
 
@@ -676,6 +862,7 @@ def build_blueprint(component_path: Path, repo_root: Path | None = None) -> dict
     declared_defaults = extract_declared_defaults(source)
     resolved_repo_root = repo_root or discover_repo_root(component_path)
     usage_signals = collect_usage_signals(component_path.stem, component_path, resolved_repo_root)
+    composition_stories = collect_composition_stories(component_path.stem, component_path, resolved_repo_root)
     branch_signals = collect_branch_signals(source, props)
     defaults: dict[str, object] = {}
 
@@ -702,9 +889,10 @@ def build_blueprint(component_path: Path, repo_root: Path | None = None) -> dict
         "defaultArgs": defaults,
         "controls": recommend_controls(props),
         "stories": stories,
-        "notes": build_notes(props, usage_signals, branch_signals),
+        "notes": build_notes(props, usage_signals, branch_signals, composition_stories),
         "lenses": ["baseline", "decision", "state", "boundary", "action", "a11y", "visual"],
         "usageSignals": usage_signals,
+        "compositionStories": composition_stories,
         "branchSignals": branch_signals,
         "interactionStories": interactions,
         "accessibilityStories": a11y,
@@ -880,6 +1068,19 @@ def render_markdown(blueprint: dict[str, object]) -> str:
             lines.append(f"- `{item['prop']}` appears in {item['count']} usage sites")
         for pair in usage.get("cooccurrence", [])[:3]:
             lines.append(f"- Co-occurs: `{pair['pair']}` ({pair['count']})")
+
+    composition = blueprint.get("compositionStories", [])
+    if composition:
+        lines.append("\n## Composition stories")
+        for item in composition:
+            args = ", ".join(f"{name}={json.dumps(value)}" for name, value in item.get("args", {}).items())
+            binding_names = ", ".join(sorted(item.get("bindings", {}).keys()))
+            details = [item["layout"], item["parentFile"]]
+            if args:
+                details.append(args)
+            if binding_names:
+                details.append(f"bindings: {binding_names}")
+            lines.append(f"- {item['storyName']}: {'; '.join(details)}")
 
     branches = blueprint.get("branchSignals", [])
     if branches:

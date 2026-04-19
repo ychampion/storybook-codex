@@ -125,6 +125,16 @@
       ]
     },
     {
+      "name": "composition-template",
+      "format": "text",
+      "story": "skills/storybook-codex/assets/templates/component.composition.stories.tsx",
+      "requiredMarkers": [
+        "__PARENT_SHELL_NAME__",
+        "InParentContext",
+        "tags: ['autodocs']"
+      ]
+    },
+    {
       "name": "visual-regression-template",
       "format": "text",
       "story": "skills/storybook-codex/assets/templates/visual-regression.spec.ts",
@@ -142,6 +152,16 @@
         "globalTypes",
         "theme",
         "density"
+      ]
+    },
+    {
+      "name": "decorator-preview-template",
+      "format": "text",
+      "story": "skills/storybook-codex/assets/templates/.storybook/preview.decorators.tsx",
+      "requiredMarkers": [
+        "__PROVIDER_ONE__",
+        "decorators",
+        "tags: ['autodocs']"
       ]
     },
     {
@@ -246,6 +266,18 @@
         "Prefer one or two decision stories"
       ],
       "expectedHiddenProps": []
+    },
+    {
+      "name": "composition-blueprint",
+      "component": "fixtures/composition-sample/CheckoutButton.tsx",
+      "repoRoot": "fixtures/composition-sample",
+      "expectedStories": ["Default", "Brand", "Loading", "Disabled"],
+      "expectedNotes": [
+        "Add at least one parent-context story so the component is reviewed where it actually ships."
+      ],
+      "expectedCompositionStories": ["InCheckoutForm", "InBillingGrid"],
+      "expectedCompositionLayouts": ["form flow", "grid layout"],
+      "expectedCompositionBindings": ["loading", "disabled"]
     }
   ],
   "reviews": [
@@ -288,6 +320,57 @@
         "play={ClickFlowPlay}",
         "args={{"
       ]
+    }
+  ],
+  "compositions": [
+    {
+      "name": "checkout-button-composition",
+      "component": "fixtures/composition-sample/CheckoutButton.tsx",
+      "repoRoot": "fixtures/composition-sample",
+      "expectedStoryNames": ["InCheckoutForm", "InBillingGrid"],
+      "expectedLayouts": ["form flow", "grid layout"],
+      "expectedParentFiles": ["CheckoutForm.tsx", "BillingGrid.tsx"],
+      "expectedBindingProps": ["loading", "disabled"]
+    }
+  ],
+  "decorators": [
+    {
+      "name": "react-provider-preview",
+      "path": "fixtures/provider-sample-react",
+      "framework": "react",
+      "expectedProviders": ["ThemeProvider", "QueryClientProvider", "I18nextProvider"],
+      "expectedPreviewMarkers": [
+        "decorators",
+        "QueryClientProvider",
+        "I18nextProvider",
+        "ThemeProvider",
+        "const queryClient = new QueryClient();"
+      ]
+    },
+    {
+      "name": "vue-provider-preview",
+      "path": "fixtures/provider-sample-vue",
+      "framework": "vue",
+      "expectedPlugins": ["router", "pinia", "i18n"],
+      "expectedPreviewMarkers": [
+        "setup((app) => {",
+        "app.use(router);",
+        "app.use(pinia);",
+        "app.use(i18n);",
+        "const pinia = createPinia();"
+      ]
+    }
+  ],
+  "diffUpdates": [
+    {
+      "name": "badge-diff-update",
+      "path": ".",
+      "diffFile": "fixtures/diff-sample/Badge.diff",
+      "story": "fixtures/diff-sample/Badge.stories.tsx",
+      "expectedStory": "fixtures/diff-sample/Badge.expected.stories.tsx",
+      "expectedAddedStories": ["Loading"],
+      "expectedRemovedWarnings": ["selected"],
+      "expectedRenameWarnings": ["tone", "variant"]
     }
   ]
 }

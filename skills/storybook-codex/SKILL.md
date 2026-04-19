@@ -1,6 +1,6 @@
 ---
 name: storybook-codex
-description: Create, review, sync, and audit React, Vue, and Svelte Storybook stories with controls, play functions, visual diff hooks, design-token globals, and optional Chromatic scaffolding. Use when the task mentions Storybook, stories, `.stories.tsx`, `.stories.ts`, `.stories.svelte`, `argTypes`, `CSF`, `play()`, addon-a11y, Chromatic, visual regression, story health, story audit, or syncing stories between frameworks. Do not use for generic UI design, framework-agnostic styling tasks, or non-Storybook component work.
+description: Create, review, sync, and audit React, Vue, and Svelte Storybook stories with controls, composition stories, diff-aware updates, play functions, visual diff hooks, design-token globals, provider decorators, and optional Chromatic scaffolding. Use when the task mentions Storybook, stories, `.stories.tsx`, `.stories.ts`, `.stories.svelte`, `argTypes`, `CSF`, `play()`, addon-a11y, Chromatic, visual regression, story health, story audit, preview decorators, providers, git diff story updates, or syncing stories between frameworks. Do not use for generic UI design, framework-agnostic styling tasks, or non-Storybook component work.
 triggers:
   - stories
   - storybook
@@ -13,6 +13,10 @@ triggers:
   - Chromatic
   - visual regression
   - story health
+  - preview.tsx
+  - decorators
+  - providers
+  - git diff
 ---
 
 # Storybook Codex
@@ -29,9 +33,10 @@ Use this skill for Storybook authoring and maintenance across React, Vue, and Sv
 
 1. Inspect the repo before editing anything.
 2. Detect the framework, Storybook version, title conventions, preview globals, and existing story style before choosing a format.
-3. Prefer updating the local convention over imposing a generic template.
-4. Keep stories compact and editorial instead of generating prop cartesian products.
-5. Use `storybook/test` for `fn`, `userEvent`, `within`, and `expect` when the story needs action logging or a `play()` flow.
+3. Detect provider trees, token globals, and parent-context usage before generating wrapper stories or preview decorators.
+4. Prefer updating the local convention over imposing a generic template.
+5. Keep stories compact and editorial instead of generating prop cartesian products.
+6. Use `storybook/test` for `fn`, `userEvent`, `within`, and `expect` when the story needs action logging or a `play()` flow.
 
 ## Built-in modes
 
@@ -47,6 +52,7 @@ It can now do more than prop inventory:
 
 - suggest stories by lens
 - mine usage signals from the repo
+- suggest parent-context composition stories
 - detect prop co-occurrence clusters
 - detect props that gate UI branches
 - suggest interaction stories
@@ -58,6 +64,36 @@ Useful flags:
 - `--repo-root <path>` for usage mining
 - `--review-story path/to/Component.stories.tsx` for a deterministic story critique
 - `--watch` for active component work
+
+### Composition mode
+
+Use composition mode when the component only makes sense inside a real parent or sibling layout.
+
+```sh
+python3 skills/storybook-codex/scripts/story_composition.py path/to/Component.tsx
+```
+
+It finds:
+
+- likely parent components that already render the target component
+- sibling components that affect spacing or focus order
+- literal props that can become `args`
+- expression bindings that should move into a render wrapper or fixture state
+
+### Diff mode
+
+Use diff mode when a branch changed component props and the story file should keep up.
+
+```sh
+python3 skills/storybook-codex/scripts/story_diff_update.py . --diff --write
+```
+
+It can:
+
+- detect changed component files from git diff
+- auto-add missing exports for new state or decision props
+- append managed diff blocks instead of rewriting the whole file
+- flag existing stories that still reference removed or renamed props
 
 ### Audit mode
 
@@ -85,6 +121,21 @@ python3 skills/storybook-codex/scripts/token_catalog.py path/to/repo
 ```
 
 It detects CSS custom properties and Tailwind-style theme tokens, then suggests `globalTypes` for theme and density controls.
+
+### Decorator mode
+
+Use decorator mode when Storybook needs the app's provider tree.
+
+```sh
+python3 skills/storybook-codex/scripts/storybook_decorators.py path/to/repo --framework react
+```
+
+It detects:
+
+- React provider trees from `App.tsx`, `main.tsx`, or `providers.tsx`
+- Vue `app.use(...)` plugin chains from `main.ts`
+- setup constants like `queryClient` or `pinia`
+- preview snippets for `.storybook/preview.tsx` or `.storybook/preview.ts`
 
 ### Sync mode
 
@@ -143,6 +194,9 @@ Do not force every lens into every component. Use the smallest set that makes th
 - Read [references/accessibility-stories.md](references/accessibility-stories.md) for a11y stories and WCAG-oriented checks.
 - Read [references/visual-diff.md](references/visual-diff.md) for screenshot strategy.
 - Read [references/design-tokens.md](references/design-tokens.md) for token-aware toolbars.
+- Read [references/composition-stories.md](references/composition-stories.md) for parent-context story heuristics.
+- Read [references/change-aware-updates.md](references/change-aware-updates.md) for git diff workflows and managed update blocks.
+- Read [references/global-decorators.md](references/global-decorators.md) for provider detection and preview scaffolding.
 - Read [references/multi-framework-sync.md](references/multi-framework-sync.md) for cross-framework parity.
 - Read [references/component-library-patterns.md](references/component-library-patterns.md) for shadcn/ui, Radix UI, and Headless UI specifics.
 - Read [references/storybook-9-readiness.md](references/storybook-9-readiness.md) when migrating or normalizing story syntax.

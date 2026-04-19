@@ -29,23 +29,31 @@ REQUIRED_PATHS = [
     ROOT / "skills" / "storybook-codex" / "references" / "interaction-stories.md",
     ROOT / "skills" / "storybook-codex" / "references" / "accessibility-stories.md",
     ROOT / "skills" / "storybook-codex" / "references" / "design-tokens.md",
+    ROOT / "skills" / "storybook-codex" / "references" / "composition-stories.md",
+    ROOT / "skills" / "storybook-codex" / "references" / "change-aware-updates.md",
+    ROOT / "skills" / "storybook-codex" / "references" / "global-decorators.md",
     ROOT / "skills" / "storybook-codex" / "references" / "multi-framework-sync.md",
     ROOT / "skills" / "storybook-codex" / "references" / "component-library-patterns.md",
     ROOT / "skills" / "storybook-codex" / "references" / "storybook-9-readiness.md",
     ROOT / "skills" / "storybook-codex" / "references" / "storybook-audit.md",
     SKILL_SCRIPTS / "storybook_codex_lib.py",
     SKILL_SCRIPTS / "story_blueprint.py",
+    SKILL_SCRIPTS / "story_composition.py",
+    SKILL_SCRIPTS / "story_diff_update.py",
+    SKILL_SCRIPTS / "storybook_decorators.py",
     SKILL_SCRIPTS / "storybook_audit.py",
     SKILL_SCRIPTS / "story_sync.py",
     SKILL_SCRIPTS / "token_catalog.py",
     ROOT / "skills" / "storybook-codex" / "assets" / "storybook-codex-small.svg",
     ROOT / "skills" / "storybook-codex" / "assets" / "storybook-codex-logo.svg",
     ROOT / "skills" / "storybook-codex" / "assets" / "templates" / "component.stories.tsx",
+    ROOT / "skills" / "storybook-codex" / "assets" / "templates" / "component.composition.stories.tsx",
     ROOT / "skills" / "storybook-codex" / "assets" / "templates" / "component.vue.stories.ts",
     ROOT / "skills" / "storybook-codex" / "assets" / "templates" / "component.svelte.stories.svelte",
     ROOT / "skills" / "storybook-codex" / "assets" / "templates" / "component.interaction.stories.tsx",
     ROOT / "skills" / "storybook-codex" / "assets" / "templates" / "visual-regression.spec.ts",
     ROOT / "skills" / "storybook-codex" / "assets" / "templates" / ".storybook" / "preview.ts",
+    ROOT / "skills" / "storybook-codex" / "assets" / "templates" / ".storybook" / "preview.decorators.tsx",
     ROOT / "skills" / "storybook-codex" / "assets" / "templates" / ".storybook" / "token-preview.ts",
     ROOT / "skills" / "storybook-codex" / "assets" / "templates" / "chromatic.config.json",
     ROOT / "skills" / "storybook-codex" / "assets" / "templates" / "libraries" / "shadcn-button.stories.tsx",
@@ -116,6 +124,9 @@ def validate_skill_metadata(errors: list[str]) -> None:
         ".stories.tsx",
         "triggers:",
         "story_blueprint.py",
+        "story_composition.py",
+        "story_diff_update.py",
+        "storybook_decorators.py",
         "storybook_audit.py",
         "story_sync.py",
         "token_catalog.py",
@@ -215,6 +226,13 @@ def validate_blueprints(cases: dict[str, object], errors: list[str]) -> None:
         interaction_names = [item["storyName"] for item in blueprint.get("interactionStories", [])]
         a11y_names = [item["storyName"] for item in blueprint.get("accessibilityStories", [])]
         visual_stories = blueprint.get("visualDiff", {}).get("captureStories", [])
+        composition_names = [item["storyName"] for item in blueprint.get("compositionStories", [])]
+        composition_layouts = [item["layout"] for item in blueprint.get("compositionStories", [])]
+        composition_bindings = {
+            binding_name
+            for item in blueprint.get("compositionStories", [])
+            for binding_name in item.get("bindings", {}).keys()
+        }
 
         for expected_story in case.get("expectedStories", []):
             if expected_story not in story_names:
@@ -237,6 +255,15 @@ def validate_blueprints(cases: dict[str, object], errors: list[str]) -> None:
         for story_name in case.get("expectedVisualStories", []):
             if story_name not in visual_stories:
                 fail(f"Blueprint {case['name']} is missing visual capture story: {story_name}", errors)
+        for story_name in case.get("expectedCompositionStories", []):
+            if story_name not in composition_names:
+                fail(f"Blueprint {case['name']} is missing composition story: {story_name}", errors)
+        for layout in case.get("expectedCompositionLayouts", []):
+            if layout not in composition_layouts:
+                fail(f"Blueprint {case['name']} is missing composition layout: {layout}", errors)
+        for binding_name in case.get("expectedCompositionBindings", []):
+            if binding_name not in composition_bindings:
+                fail(f"Blueprint {case['name']} is missing composition binding: {binding_name}", errors)
 
 
 def validate_reviews(cases: dict[str, object], errors: list[str]) -> None:
@@ -340,6 +367,119 @@ def validate_syncs(cases: dict[str, object], errors: list[str]) -> None:
                 fail(f"Sync {case['name']} is missing expected content: {marker}", errors)
 
 
+def validate_compositions(cases: dict[str, object], errors: list[str]) -> None:
+    composition_script = SKILL_SCRIPTS / "story_composition.py"
+    for case in cases.get("compositions", []):
+        command = [sys.executable, str(composition_script), str(ROOT / case["component"])]
+        if case.get("repoRoot"):
+            command.extend(["--repo-root", str(ROOT / case["repoRoot"])])
+        payload = run_json(command, errors, f"Composition {case['name']}")
+        if payload is None:
+            continue
+
+        suggestions = list(payload.get("compositionStories", []))
+        story_names = [item["storyName"] for item in suggestions]
+        layouts = [item["layout"] for item in suggestions]
+        parent_files = [item["parentFile"] for item in suggestions]
+        binding_names = {
+            binding_name
+            for item in suggestions
+            for binding_name in item.get("bindings", {}).keys()
+        }
+
+        for expected in case.get("expectedStoryNames", []):
+            if expected not in story_names:
+                fail(f"Composition {case['name']} is missing story: {expected}", errors)
+        for expected in case.get("expectedLayouts", []):
+            if expected not in layouts:
+                fail(f"Composition {case['name']} is missing layout: {expected}", errors)
+        for expected in case.get("expectedParentFiles", []):
+            if expected not in parent_files:
+                fail(f"Composition {case['name']} is missing parent file: {expected}", errors)
+        for expected in case.get("expectedBindingProps", []):
+            if expected not in binding_names:
+                fail(f"Composition {case['name']} is missing binding prop: {expected}", errors)
+
+
+def validate_decorators(cases: dict[str, object], errors: list[str]) -> None:
+    decorator_script = SKILL_SCRIPTS / "storybook_decorators.py"
+    for case in cases.get("decorators", []):
+        payload = run_json(
+            [
+                sys.executable,
+                str(decorator_script),
+                str(ROOT / case["path"]),
+                "--framework",
+                case["framework"],
+            ],
+            errors,
+            f"Decorators {case['name']}",
+        )
+        if payload is None:
+            continue
+
+        preview_snippet = str(payload.get("previewSnippet", ""))
+        providers = [item["name"] for item in payload.get("providers", [])]
+        plugins = list(payload.get("plugins", []))
+
+        for expected in case.get("expectedProviders", []):
+            if expected not in providers:
+                fail(f"Decorators {case['name']} is missing provider: {expected}", errors)
+        for expected in case.get("expectedPlugins", []):
+            if expected not in plugins:
+                fail(f"Decorators {case['name']} is missing plugin: {expected}", errors)
+        for expected in case.get("expectedPreviewMarkers", []):
+            if expected not in preview_snippet:
+                fail(f"Decorators {case['name']} preview is missing: {expected}", errors)
+
+
+def validate_diff_updates(cases: dict[str, object], errors: list[str]) -> None:
+    diff_script = SKILL_SCRIPTS / "story_diff_update.py"
+    for case in cases.get("diffUpdates", []):
+        story_path = ROOT / case["story"]
+        expected_path = ROOT / case["expectedStory"]
+        original_story = story_path.read_text(encoding="utf-8")
+
+        try:
+            payload = run_json(
+                [
+                    sys.executable,
+                    str(diff_script),
+                    str(ROOT / case["path"]),
+                    "--diff-file",
+                    str(ROOT / case["diffFile"]),
+                    "--write",
+                ],
+                errors,
+                f"Diff update {case['name']}",
+            )
+            if payload is None:
+                continue
+
+            if not payload.get("changedComponents"):
+                fail(f"Diff update {case['name']} produced no changed components", errors)
+                continue
+
+            item = payload["changedComponents"][0]
+            for expected in case.get("expectedAddedStories", []):
+                if expected not in item.get("addedStoryExports", []):
+                    fail(f"Diff update {case['name']} is missing added story export: {expected}", errors)
+            notes = "\n".join(item.get("notes", []))
+            for expected in case.get("expectedRemovedWarnings", []):
+                if expected not in notes:
+                    fail(f"Diff update {case['name']} is missing removed warning: {expected}", errors)
+            for expected in case.get("expectedRenameWarnings", []):
+                if expected not in notes:
+                    fail(f"Diff update {case['name']} is missing rename warning: {expected}", errors)
+
+            updated_story = story_path.read_text(encoding="utf-8")
+            expected_story = expected_path.read_text(encoding="utf-8")
+            if updated_story != expected_story:
+                fail(f"Diff update {case['name']} story output does not match expected fixture", errors)
+        finally:
+            story_path.write_text(original_story, encoding="utf-8")
+
+
 def validate_viewer(errors: list[str]) -> None:
     viewer_js = (ROOT / "tools" / "fixtures-viewer" / "app.js").read_text(encoding="utf-8")
     for marker in ("fixtures/cases.json", "Load local JSON", "renderContract"):
@@ -387,6 +527,9 @@ def main() -> int:
     validate_audits(cases, errors)
     validate_token_catalogs(cases, errors)
     validate_syncs(cases, errors)
+    validate_compositions(cases, errors)
+    validate_decorators(cases, errors)
+    validate_diff_updates(cases, errors)
     validate_viewer(errors)
     validate_watch_mode(errors)
 

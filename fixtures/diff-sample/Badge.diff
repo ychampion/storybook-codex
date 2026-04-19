@@ -1,0 +1,13 @@
+diff --git a/fixtures/diff-sample/Badge.tsx b/fixtures/diff-sample/Badge.tsx
+index 1111111..2222222 100644
+--- a/fixtures/diff-sample/Badge.tsx
++++ b/fixtures/diff-sample/Badge.tsx
+@@ -1,7 +1,7 @@
+ export interface BadgeProps {
+-  tone?: 'brand' | 'danger';
+-  selected?: boolean;
++  variant?: 'brand' | 'danger';
++  loading?: boolean;
+   compact?: boolean;
+   label?: string;
+ }

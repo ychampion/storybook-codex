@@ -5,6 +5,9 @@
 It gives Codex one focused skill that can:
 
 - create or update React, Vue, and Svelte Storybook stories
+- suggest parent-context stories from real component usage
+- update only affected stories from git diff signals
+- generate Storybook preview decorators from app providers
 - generate `args`, selective `argTypes`, controls, and autodocs tags
 - scaffold interaction stories with `play()` and `storybook/test`
 - suggest accessibility stories instead of treating a11y as an afterthought
@@ -18,6 +21,9 @@ It gives Codex one focused skill that can:
 Most Storybook prompts stop at "make a story file." This skill pushes further:
 
 - `story_blueprint.py` is repo-aware, not just prop-aware. It mines usage, co-occurrence, branchy props, interaction flows, a11y lenses, and visual baselines.
+- `story_composition.py` finds the parent contexts components actually ship inside, then turns those into wrapper-story suggestions.
+- `story_diff_update.py` reads git diff output and updates only the stories that were affected by a component API change.
+- `storybook_decorators.py` inspects app providers and emits preview decorators or Vue setup hooks instead of forcing teams to hand-roll them again.
 - `storybook_audit.py` turns the skill into an ongoing quality system with a Story Health Score.
 - `story_sync.py` keeps React, Vue, and Svelte story structures aligned for multi-framework design systems.
 - `token_catalog.py` finds CSS-variable and Tailwind-style tokens and suggests Storybook globals for theme and density.
@@ -28,6 +34,9 @@ Most Storybook prompts stop at "make a story file." This skill pushes further:
 - `.codex-plugin/plugin.json` for plugin packaging
 - `skills/storybook-codex/` with the actual Codex skill
 - `skills/storybook-codex/scripts/story_blueprint.py` for blueprinting, review mode, and watch mode
+- `skills/storybook-codex/scripts/story_composition.py` for parent-context story discovery
+- `skills/storybook-codex/scripts/story_diff_update.py` for change-aware story maintenance from git diff
+- `skills/storybook-codex/scripts/storybook_decorators.py` for `.storybook/preview` scaffolding from provider trees
 - `skills/storybook-codex/scripts/storybook_audit.py` for repo-wide Storybook scoring
 - `skills/storybook-codex/scripts/story_sync.py` for multi-framework story mirroring
 - `skills/storybook-codex/scripts/token_catalog.py` for token-aware globals
@@ -50,6 +59,30 @@ Useful flags:
 - `--repo-root <path>` to mine usage in the local app
 - `--review-story path/to/Component.stories.tsx` to critique an existing story file
 - `--watch` to rerun the blueprint while the component changes
+
+### Suggest composition stories
+
+```sh
+python3 skills/storybook-codex/scripts/story_composition.py path/to/Component.tsx --repo-root path/to/repo
+```
+
+Use this when the component only makes sense inside a form, grid, card, dialog, or sidebar context.
+
+### Update stories from git diff
+
+```sh
+python3 skills/storybook-codex/scripts/story_diff_update.py . --diff --write
+```
+
+Use `--diff-file` in CI or validation when you want the updater to read a saved patch instead of the live repo diff.
+
+### Generate preview decorators
+
+```sh
+python3 skills/storybook-codex/scripts/storybook_decorators.py path/to/repo --framework react --format preview
+```
+
+This inspects `App.tsx`, `main.tsx`, or `main.ts` and emits the provider tree Storybook needs.
 
 ### Audit a Storybook repo
 
@@ -78,6 +111,9 @@ python3 skills/storybook-codex/scripts/story_sync.py src/Button.stories.tsx --ta
 - expected story exports and markers
 - template markers
 - blueprint expectations
+- composition-story expectations
+- decorator preview expectations
+- diff-update expectations
 - review expectations
 - audit expectations
 - token catalog expectations
@@ -85,11 +121,18 @@ python3 skills/storybook-codex/scripts/story_sync.py src/Button.stories.tsx --ta
 
 The viewer at `tools/fixtures-viewer/index.html` reads that contract and turns it into a quick QA dashboard.
 
+## Roadmap signal
+
+The current release already covers React, Vue, and Svelte story generation. The next layer is deeper parity for composition, diff, and global-decorator flows across Vue and Svelte packages so multi-framework design systems can keep one review standard.
+
 ## Example prompts
 
 - `Use $storybook-codex to create stories for src/components/Button.tsx.`
 - `Use $storybook-codex to review src/components/Dialog.stories.tsx and raise story health.`
 - `Use $storybook-codex to add interaction stories and visual regression coverage for the modal.`
+- `Use $storybook-codex to suggest composition stories for CheckoutButton from the real checkout flow.`
+- `Use $storybook-codex to update stories for changed components from git diff on this branch.`
+- `Use $storybook-codex to generate .storybook/preview.tsx decorators from our app providers.`
 - `Use $storybook-codex to sync the React stories for Button into the Vue package.`
 - `Use $storybook-codex to expose theme and density globals from our design tokens.`
 - `Use $storybook-codex to audit this Storybook repo and tell me which components are weak.`
