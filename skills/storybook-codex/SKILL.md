@@ -1,19 +1,31 @@
 ---
 name: storybook-codex
-description: Create or update React Storybook stories, controls, autodocs tags, and optional Chromatic scaffolding. Use when the task is specifically about React `.stories.tsx`, Storybook component documentation, or migrating old Storybook story patterns to modern `Meta` + `StoryObj` object stories. Do not use for non-React frontend work, generic UI design, or framework-agnostic styling tasks.
+description: Create or update React, Vue, and Svelte Storybook stories, controls, autodocs tags, and optional Chromatic scaffolding. Use when the task mentions Storybook, `stories`, `.stories.tsx`, `.stories.ts`, `.stories.svelte`, `argTypes`, `CSF`, Storybook component documentation, or migrating older story patterns to modern object stories. Do not use for generic UI design, framework-agnostic styling tasks, or non-Storybook component work.
 ---
 
 # Storybook Codex
 
-Use this skill for React Storybook work only.
+Use this skill for framework-specific Storybook authoring:
+
+- React components and `.stories.tsx`
+- Vue single-file components and `.stories.ts`
+- Svelte components and `.stories.svelte` when the repo uses native Svelte CSF
 
 ## Default behavior
 
 1. Inspect the repo before editing anything.
-2. Detect existing Storybook config, preview tags, story naming/title conventions, and current component story patterns.
-3. If you need a quick prop inventory or story shape suggestion, run `python skills/storybook-codex/scripts/story_blueprint.py <component-path>`.
-4. Prefer updating the local convention over imposing a generic template.
-5. Keep stories compact and representative.
+2. Detect the framework from the component extension and the local Storybook setup before choosing a story format.
+3. Detect existing Storybook config, preview tags, story naming/title conventions, and current component story patterns.
+4. If you need a quick prop inventory or story shape suggestion, run `python3 skills/storybook-codex/scripts/story_blueprint.py <component-path>` on macOS/Linux, or `python` / `py -3` on Windows.
+5. Prefer updating the local convention over imposing a generic template.
+6. Keep stories compact and representative.
+
+## Framework routing
+
+- Read [references/react-stories.md](references/react-stories.md) for React components and `.stories.tsx`.
+- Read [references/vue-stories.md](references/vue-stories.md) for Vue single-file components and `.stories.ts`.
+- Read [references/svelte-stories.md](references/svelte-stories.md) for Svelte components and `.stories.svelte`.
+- If the repo already uses a valid local pattern for the same framework, prefer that pattern over the template files.
 
 ## Story design lenses
 
@@ -29,8 +41,8 @@ Do not force every lens into every component. Use the smallest set that makes th
 
 ## Story rules
 
-- Default to `.stories.tsx`.
-- Use stable object stories with `Meta` and `StoryObj`.
+- Default to the extension that matches the local framework and repo convention.
+- Use stable object stories with `Meta` and `StoryObj` where the framework expects them.
 - Prefer:
 
 ```ts
@@ -45,6 +57,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 ```
 
+- For Svelte repos using `@storybook/addon-svelte-csf`, prefer native `.stories.svelte` files with `defineMeta` and `<Story />`.
 - Do not generate `Template.bind({})`, `ComponentStory`, or other older CSF2 patterns for new work.
 - Prefer component-level `args` for shared defaults.
 - Add a small set of named stories for meaningful states such as default, disabled, loading, tone, size, or theme.
@@ -80,6 +93,8 @@ Read [references/chromatic.md](references/chromatic.md) before writing Chromatic
 ## References
 
 - Read [references/react-stories.md](references/react-stories.md) for the baseline React story shape and story selection heuristics.
+- Read [references/vue-stories.md](references/vue-stories.md) for Vue story authoring and slot-aware render patterns.
+- Read [references/svelte-stories.md](references/svelte-stories.md) for native Svelte CSF guidance and fallback rules.
 - Read [references/story-design-lenses.md](references/story-design-lenses.md) when you need help deciding which stories are actually worth generating.
 - Read [references/controls-and-autodocs.md](references/controls-and-autodocs.md) for controls, autodocs, and event-handler guidance.
 - Read [references/chromatic.md](references/chromatic.md) for opt-in Chromatic scaffolding rules.

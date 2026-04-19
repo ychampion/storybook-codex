@@ -19,6 +19,8 @@ REQUIRED_PATHS = [
     ROOT / "skills" / "storybook-codex" / "SKILL.md",
     ROOT / "skills" / "storybook-codex" / "agents" / "openai.yaml",
     ROOT / "skills" / "storybook-codex" / "references" / "react-stories.md",
+    ROOT / "skills" / "storybook-codex" / "references" / "vue-stories.md",
+    ROOT / "skills" / "storybook-codex" / "references" / "svelte-stories.md",
     ROOT / "skills" / "storybook-codex" / "references" / "story-design-lenses.md",
     ROOT / "skills" / "storybook-codex" / "references" / "controls-and-autodocs.md",
     ROOT / "skills" / "storybook-codex" / "references" / "chromatic.md",
@@ -26,6 +28,8 @@ REQUIRED_PATHS = [
     ROOT / "skills" / "storybook-codex" / "assets" / "storybook-codex-small.svg",
     ROOT / "skills" / "storybook-codex" / "assets" / "storybook-codex-logo.svg",
     ROOT / "skills" / "storybook-codex" / "assets" / "templates" / "component.stories.tsx",
+    ROOT / "skills" / "storybook-codex" / "assets" / "templates" / "component.vue.stories.ts",
+    ROOT / "skills" / "storybook-codex" / "assets" / "templates" / "component.svelte.stories.svelte",
     ROOT / "skills" / "storybook-codex" / "assets" / "templates" / ".storybook" / "preview.ts",
     ROOT / "skills" / "storybook-codex" / "assets" / "templates" / "chromatic.config.json",
     ROOT
@@ -40,6 +44,7 @@ REQUIRED_PATHS = [
 ]
 
 STORY_NAME_RE = re.compile(r"export const (\w+): Story\b")
+SVELTE_STORY_NAME_RE = re.compile(r'<Story\s+name="([^"]+)"')
 
 
 def fail(message: str, errors: list[str]) -> None:
@@ -62,6 +67,11 @@ def validate_manifest(errors: list[str]) -> None:
     if manifest.get("skills") != "./skills/":
         fail("plugin.json skills path must be ./skills/", errors)
 
+    keywords = set(manifest.get("keywords", []))
+    for keyword in ("react", "vue", "svelte", "storybook"):
+        if keyword not in keywords:
+            fail(f"plugin.json keywords must include {keyword}", errors)
+
     interface = manifest.get("interface", {})
     if "$storybook-codex" not in " ".join(interface.get("defaultPrompt", [])):
         fail("plugin.json defaultPrompt entries must mention $storybook-codex", errors)
@@ -78,8 +88,13 @@ def validate_skill_metadata(errors: list[str]) -> None:
     if "name: storybook-codex" not in skill_text:
         fail("SKILL.md frontmatter must include name: storybook-codex", errors)
 
-    if "Create or update React Storybook stories" not in skill_text:
-        fail("SKILL.md description is missing the main trigger intent", errors)
+    for phrase in (
+        "Create or update React, Vue, and Svelte Storybook stories",
+        ".stories.svelte",
+        ".stories.tsx",
+    ):
+        if phrase not in skill_text:
+            fail(f"SKILL.md is missing framework routing phrase: {phrase}", errors)
 
     openai_yaml = (
         ROOT / "skills" / "storybook-codex" / "agents" / "openai.yaml"
@@ -88,13 +103,15 @@ def validate_skill_metadata(errors: list[str]) -> None:
         fail("agents/openai.yaml display_name is missing or wrong", errors)
     if "$storybook-codex" not in openai_yaml:
         fail("agents/openai.yaml default prompt must mention $storybook-codex", errors)
+    if "React, Vue, and Svelte" not in openai_yaml:
+        fail("agents/openai.yaml should mention React, Vue, and Svelte", errors)
     if "icon_small: \"./assets/storybook-codex-small.svg\"" not in openai_yaml:
         fail("agents/openai.yaml icon_small is missing or wrong", errors)
     if "icon_large: \"./assets/storybook-codex-logo.svg\"" not in openai_yaml:
         fail("agents/openai.yaml icon_large is missing or wrong", errors)
 
 
-def validate_story_file(
+def validate_csf_story_file(
     story_path: Path,
     required_stories: list[str],
     required_markers: list[str],
@@ -139,6 +156,40 @@ def validate_story_file(
             )
 
 
+def validate_svelte_story_file(
+    story_path: Path,
+    required_stories: list[str],
+    required_markers: list[str],
+    errors: list[str],
+) -> None:
+    text = story_path.read_text(encoding="utf-8")
+    found_story_names = SVELTE_STORY_NAME_RE.findall(text)
+
+    for marker in ("defineMeta", "<Story", "tags: ['autodocs']"):
+        if marker not in text:
+            fail(f"{story_path.relative_to(ROOT)} is missing marker: {marker}", errors)
+
+    if "<Meta" in text or "<Template" in text:
+        fail(f"{story_path.relative_to(ROOT)} still uses deprecated Svelte story blocks", errors)
+
+    if not found_story_names:
+        fail(f"{story_path.relative_to(ROOT)} exports no named stories", errors)
+
+    for story_name in required_stories:
+        if story_name not in found_story_names:
+            fail(
+                f"{story_path.relative_to(ROOT)} is missing story export: {story_name}",
+                errors,
+            )
+
+    for marker in required_markers:
+        if marker not in text:
+            fail(
+                f"{story_path.relative_to(ROOT)} is missing expected content: {marker}",
+                errors,
+            )
+
+
 def validate_cases(errors: list[str]) -> None:
     cases = json.loads(CASES_PATH.read_text(encoding="utf-8"))
 
@@ -148,12 +199,23 @@ def validate_cases(errors: list[str]) -> None:
             if not story_path.exists():
                 fail(f"Missing story fixture: {case['story']}", errors)
                 continue
-            validate_story_file(
-                story_path=story_path,
-                required_stories=case.get("requiredStories", []),
-                required_markers=case.get("requiredMarkers", []),
-                errors=errors,
-            )
+            format_name = case.get("format", "csf")
+            if format_name == "csf":
+                validate_csf_story_file(
+                    story_path=story_path,
+                    required_stories=case.get("requiredStories", []),
+                    required_markers=case.get("requiredMarkers", []),
+                    errors=errors,
+                )
+            elif format_name == "svelte-csf":
+                validate_svelte_story_file(
+                    story_path=story_path,
+                    required_stories=case.get("requiredStories", []),
+                    required_markers=case.get("requiredMarkers", []),
+                    errors=errors,
+                )
+            else:
+                fail(f"Unknown story validation format: {format_name}", errors)
 
     blueprint_script = ROOT / "skills" / "storybook-codex" / "scripts" / "story_blueprint.py"
     for case in cases.get("blueprints", []):

@@ -2,6 +2,7 @@
   "stories": [
     {
       "name": "basic-button",
+      "format": "csf",
       "story": "fixtures/basic-button/Button.expected.stories.tsx",
       "requiredStories": ["Default", "Brand", "Disabled", "Loading", "Large"],
       "requiredMarkers": [
@@ -13,6 +14,7 @@
     },
     {
       "name": "alert",
+      "format": "csf",
       "story": "fixtures/alert/Alert.expected.stories.tsx",
       "requiredStories": ["Info", "Success", "Danger", "Dismissible"],
       "requiredMarkers": [
@@ -24,6 +26,7 @@
     },
     {
       "name": "theme-badge",
+      "format": "csf",
       "story": "fixtures/theme-badge/ThemeBadge.expected.stories.tsx",
       "requiredStories": ["System", "Light", "Dark", "Selected", "Compact"],
       "requiredMarkers": [
@@ -34,6 +37,7 @@
     },
     {
       "name": "existing-story-migration",
+      "format": "csf",
       "story": "fixtures/existing-story/Badge.expected.stories.tsx",
       "requiredStories": ["Default", "Solid", "RoundedOff"],
       "requiredMarkers": [
@@ -41,17 +45,68 @@
         "tags: ['autodocs']",
         "control: 'inline-radio'"
       ]
+    },
+    {
+      "name": "vue-info-panel",
+      "format": "csf",
+      "story": "fixtures/vue-info-panel/InfoPanel.expected.stories.ts",
+      "requiredStories": ["Default", "Success", "Danger", "Compact"],
+      "requiredMarkers": [
+        "@storybook/vue3-vite",
+        "tags: ['autodocs']",
+        "control: 'inline-radio'",
+        "className: {"
+      ]
+    },
+    {
+      "name": "svelte-status-pill",
+      "format": "svelte-csf",
+      "story": "fixtures/svelte-status-pill/StatusPill.expected.stories.svelte",
+      "requiredStories": ["Default", "Brand", "Danger", "Selected", "Compact"],
+      "requiredMarkers": [
+        "@storybook/addon-svelte-csf",
+        "tags: ['autodocs']",
+        "control: 'inline-radio'",
+        "const { Story } = defineMeta({"
+      ]
     }
   ],
   "templates": [
     {
       "name": "component-template",
+      "format": "csf",
       "story": "skills/storybook-codex/assets/templates/component.stories.tsx",
       "allowPlaceholders": true,
       "requiredStories": ["Default", "Disabled"],
       "requiredMarkers": [
         "__COMPONENT_NAME__",
         "__COMPONENT_IMPORT_PATH__",
+        "tags: ['autodocs']"
+      ]
+    },
+    {
+      "name": "vue-component-template",
+      "format": "csf",
+      "story": "skills/storybook-codex/assets/templates/component.vue.stories.ts",
+      "allowPlaceholders": true,
+      "requiredStories": ["Default", "Success"],
+      "requiredMarkers": [
+        "__COMPONENT_NAME__",
+        "__COMPONENT_IMPORT_PATH__",
+        "@storybook/vue3-vite",
+        "tags: ['autodocs']"
+      ]
+    },
+    {
+      "name": "svelte-component-template",
+      "format": "svelte-csf",
+      "story": "skills/storybook-codex/assets/templates/component.svelte.stories.svelte",
+      "allowPlaceholders": true,
+      "requiredStories": ["Default", "Brand"],
+      "requiredMarkers": [
+        "__COMPONENT_NAME__",
+        "__COMPONENT_IMPORT_PATH__",
+        "@storybook/addon-svelte-csf",
         "tags: ['autodocs']"
       ]
     }
@@ -76,6 +131,25 @@
         "Hide internal props from docs tables and controls: className."
       ],
       "expectedHiddenProps": ["className"]
+    },
+    {
+      "name": "vue-info-panel-blueprint",
+      "component": "fixtures/vue-info-panel/InfoPanel.vue",
+      "expectedStories": ["Default", "Success", "Danger", "Compact", "LongContent"],
+      "expectedNotes": [
+        "Hide internal props from docs tables and controls: className.",
+        "Prefer one or two decision stories"
+      ],
+      "expectedHiddenProps": ["className"]
+    },
+    {
+      "name": "svelte-status-pill-blueprint",
+      "component": "fixtures/svelte-status-pill/StatusPill.svelte",
+      "expectedStories": ["Default", "Brand", "Danger", "Selected", "Compact", "LongContent"],
+      "expectedNotes": [
+        "Prefer one or two decision stories"
+      ],
+      "expectedHiddenProps": []
     }
   ]
 }

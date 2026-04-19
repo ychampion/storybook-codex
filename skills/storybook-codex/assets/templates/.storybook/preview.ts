@@ -1,6 +1,4 @@
-import type { Preview } from '@storybook/react';
-
-const preview: Preview = {
+const preview = {
   tags: ['autodocs'],
   parameters: {
     controls: {
@@ -10,4 +8,3 @@ const preview: Preview = {
 };
 
 export default preview;
-

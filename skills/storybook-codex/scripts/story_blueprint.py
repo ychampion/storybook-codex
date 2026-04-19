@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate a deterministic story blueprint for a React component."""
+"""Generate a deterministic story blueprint for a React, Vue, or Svelte component."""
 
 from __future__ import annotations
 
@@ -11,10 +11,20 @@ from pathlib import Path
 
 
 PROPS_BLOCK_RE = re.compile(
-    r"(?:export\s+)?(?:type|interface)\s+(?P<name>\w+Props)\s*(?:=\s*)?{(?P<body>.*?)};?",
+    r"(?:export\s+)?(?:type|interface)\s+(?P<name>(?:\w+)?Props)\s*(?:=\s*)?{(?P<body>.*?)};?",
+    re.DOTALL,
+)
+DEFINE_PROPS_INLINE_RE = re.compile(
+    r"defineProps\s*<\s*{(?P<body>.*?)}\s*>\s*\(",
     re.DOTALL,
 )
 PROP_RE = re.compile(r"^\s*(?P<name>[A-Za-z_][A-Za-z0-9_]*)\??:\s*(?P<type>[^;]+);")
+EXPORT_LET_RE = re.compile(
+    r"^\s*export\s+let\s+(?P<name>[A-Za-z_][A-Za-z0-9_]*)"
+    r"(?:\s*:\s*(?P<type>[^=;]+))?"
+    r"(?:\s*=\s*[^;]+)?;",
+    re.MULTILINE,
+)
 STRING_LITERAL_RE = re.compile(r"'([^']+)'|\"([^\"]+)\"")
 EVENT_RE = re.compile(r"^on[A-Z]")
 
@@ -63,13 +73,9 @@ def pick_variant_values(prop_name: str, options: list[str]) -> list[str]:
     return options[1:3]
 
 
-def parse_props(source: str) -> list[dict[str, object]]:
-    match = PROPS_BLOCK_RE.search(source)
-    if not match:
-        return []
-
+def parse_prop_body(body: str) -> list[dict[str, object]]:
     props: list[dict[str, object]] = []
-    for raw_line in match.group("body").splitlines():
+    for raw_line in body.splitlines():
         line = raw_line.strip()
         if not line or line.startswith("//"):
             continue
@@ -93,6 +99,52 @@ def parse_props(source: str) -> list[dict[str, object]]:
             }
         )
     return props
+
+
+def dedupe_props(props: list[dict[str, object]]) -> list[dict[str, object]]:
+    deduped: list[dict[str, object]] = []
+    seen: set[str] = set()
+    for prop in props:
+        name = str(prop["name"])
+        if name in seen:
+            continue
+        deduped.append(prop)
+        seen.add(name)
+    return deduped
+
+
+def parse_props(source: str) -> list[dict[str, object]]:
+    props: list[dict[str, object]] = []
+
+    for match in PROPS_BLOCK_RE.finditer(source):
+        props.extend(parse_prop_body(match.group("body")))
+
+    if props:
+        return dedupe_props(props)
+
+    inline_props = DEFINE_PROPS_INLINE_RE.search(source)
+    if inline_props:
+        props.extend(parse_prop_body(inline_props.group("body")))
+
+    for export_match in EXPORT_LET_RE.finditer(source):
+        prop_name = export_match.group("name")
+        raw_type = (export_match.group("type") or "unknown").strip()
+        options = [
+            left or right
+            for left, right in STRING_LITERAL_RE.findall(raw_type)
+            if (left or right)
+        ]
+        props.append(
+            {
+                "name": prop_name,
+                "type": raw_type,
+                "options": options,
+                "isEvent": bool(EVENT_RE.match(prop_name)),
+                "isHidden": prop_name in HIDE_NAMES,
+            }
+        )
+
+    return dedupe_props(props)
 
 
 def sample_value(prop_name: str, raw_type: str, options: list[str]) -> object | None:
@@ -195,6 +247,7 @@ def build_blueprint(component_path: Path) -> dict[str, object]:
     return {
         "component": component_path.stem,
         "componentPath": str(component_path),
+        "framework": detect_framework(component_path),
         "props": props,
         "defaultArgs": defaults,
         "controls": recommend_controls(props),
@@ -204,9 +257,18 @@ def build_blueprint(component_path: Path) -> dict[str, object]:
     }
 
 
+def detect_framework(component_path: Path) -> str:
+    suffix = component_path.suffix.lower()
+    if suffix == ".vue":
+        return "vue"
+    if suffix == ".svelte":
+        return "svelte"
+    return "react"
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Generate a Storybook story blueprint.")
-    parser.add_argument("component_path", help="Path to a React component file")
+    parser.add_argument("component_path", help="Path to a React, Vue, or Svelte component file")
     parser.add_argument("--format", choices=("json", "markdown"), default="json")
     args = parser.parse_args()
 
