@@ -150,6 +150,25 @@
         "Prefer one or two decision stories"
       ],
       "expectedHiddenProps": []
+    },
+    {
+      "name": "theme-badge-blueprint",
+      "component": "fixtures/theme-badge/ThemeBadge.tsx",
+      "expectedStories": ["Default", "Dark", "Light", "Selected", "Compact", "LongContent"],
+      "expectedNotes": [
+        "Hide internal props from docs tables and controls: className.",
+        "Prefer one or two decision stories"
+      ],
+      "expectedHiddenProps": ["className"]
+    },
+    {
+      "name": "existing-story-badge-blueprint",
+      "component": "fixtures/existing-story/Badge.tsx",
+      "expectedStories": ["Default", "Solid", "LongContent"],
+      "expectedNotes": [
+        "Prefer one or two decision stories"
+      ],
+      "expectedHiddenProps": []
     }
   ]
 }
