@@ -24,6 +24,7 @@ REQUIRED_PATHS = [
     ROOT / "skills" / "storybook-codex" / "references" / "svelte-stories.md",
     ROOT / "skills" / "storybook-codex" / "references" / "story-design-lenses.md",
     ROOT / "skills" / "storybook-codex" / "references" / "controls-and-autodocs.md",
+    ROOT / "skills" / "storybook-codex" / "references" / "documentation-stories.md",
     ROOT / "skills" / "storybook-codex" / "references" / "chromatic.md",
     ROOT / "skills" / "storybook-codex" / "references" / "visual-diff.md",
     ROOT / "skills" / "storybook-codex" / "references" / "interaction-stories.md",
@@ -38,6 +39,7 @@ REQUIRED_PATHS = [
     ROOT / "skills" / "storybook-codex" / "references" / "storybook-audit.md",
     SKILL_SCRIPTS / "storybook_codex_lib.py",
     SKILL_SCRIPTS / "story_blueprint.py",
+    SKILL_SCRIPTS / "story_docs.py",
     SKILL_SCRIPTS / "story_composition.py",
     SKILL_SCRIPTS / "story_diff_update.py",
     SKILL_SCRIPTS / "storybook_decorators.py",
@@ -47,6 +49,8 @@ REQUIRED_PATHS = [
     ROOT / "skills" / "storybook-codex" / "assets" / "storybook-codex-small.svg",
     ROOT / "skills" / "storybook-codex" / "assets" / "storybook-codex-logo.svg",
     ROOT / "skills" / "storybook-codex" / "assets" / "templates" / "component.stories.tsx",
+    ROOT / "skills" / "storybook-codex" / "assets" / "templates" / "component.docs.stories.tsx",
+    ROOT / "skills" / "storybook-codex" / "assets" / "templates" / "component.docs.stories.mdx",
     ROOT / "skills" / "storybook-codex" / "assets" / "templates" / "component.composition.stories.tsx",
     ROOT / "skills" / "storybook-codex" / "assets" / "templates" / "component.vue.stories.ts",
     ROOT / "skills" / "storybook-codex" / "assets" / "templates" / "component.svelte.stories.svelte",
@@ -60,6 +64,9 @@ REQUIRED_PATHS = [
     ROOT / "skills" / "storybook-codex" / "assets" / "templates" / "libraries" / "radix-dialog.stories.tsx",
     ROOT / "skills" / "storybook-codex" / "assets" / "templates" / "libraries" / "headlessui-dialog.stories.tsx",
     ROOT / "skills" / "storybook-codex" / "assets" / "templates" / ".github" / "workflows" / "chromatic.yml",
+    ROOT / "fixtures" / "docs-sample" / "ActionButton.tsx",
+    ROOT / "fixtures" / "docs-sample" / "ActionButtonUsage.tsx",
+    ROOT / "fixtures" / "docs-sample" / "ActionButton.stories.tsx",
     ROOT / "tools" / "fixtures-viewer" / "index.html",
     ROOT / "tools" / "fixtures-viewer" / "app.js",
     ROOT / "tools" / "fixtures-viewer" / "styles.css",
@@ -119,11 +126,14 @@ def validate_skill_metadata(errors: list[str]) -> None:
 
     for phrase in (
         "name: storybook-codex",
-        "Create or update React, Vue, and Svelte Storybook stories",
-        ".stories.svelte",
-        ".stories.tsx",
+        "Create, document, compose, update, review, sync, and audit React, Vue, and Svelte Storybook stories",
         "triggers:",
+        ".stories.tsx",
+        ".stories.svelte",
+        ".stories.mdx",
+        "parameters.docs.description",
         "story_blueprint.py",
+        "story_docs.py",
         "story_composition.py",
         "story_diff_update.py",
         "storybook_decorators.py",
@@ -140,6 +150,8 @@ def validate_skill_metadata(errors: list[str]) -> None:
         'display_name: "Storybook Codex"',
         "$storybook-codex",
         "React, Vue, and Svelte",
+        ".stories.mdx",
+        "parameters.docs.description",
         'icon_small: "./assets/storybook-codex-small.svg"',
         'icon_large: "./assets/storybook-codex-logo.svg"',
     ):
@@ -154,24 +166,44 @@ def validate_text_file(path: Path, required_markers: list[str], errors: list[str
             fail(f"{path.relative_to(ROOT)} is missing expected content: {marker}", errors)
 
 
-def validate_csf_story_file(path: Path, required_stories: list[str], required_markers: list[str], errors: list[str]) -> None:
-    text = path.read_text(encoding="utf-8")
+def validate_csf_story_text(
+    label: str,
+    text: str,
+    required_stories: list[str],
+    required_markers: list[str],
+    errors: list[str],
+) -> None:
     found_story_names = STORY_NAME_RE.findall(text)
 
     for marker in ("Meta", "StoryObj", "export default meta", "type Story = StoryObj<typeof meta>;"):
         if marker not in text:
-            fail(f"{path.relative_to(ROOT)} is missing marker: {marker}", errors)
+            fail(f"{label} is missing marker: {marker}", errors)
 
     if "Template.bind" in text or "ComponentStory" in text or "ComponentMeta" in text:
-        fail(f"{path.relative_to(ROOT)} still uses legacy Storybook syntax", errors)
+        fail(f"{label} still uses legacy Storybook syntax", errors)
     if "@storybook/test" in text:
-        fail(f"{path.relative_to(ROOT)} still imports @storybook/test", errors)
+        fail(f"{label} still imports @storybook/test", errors)
+
+    if required_stories and not found_story_names:
+        fail(f"{label} exports no named stories", errors)
 
     for story_name in required_stories:
         if story_name not in found_story_names:
-            fail(f"{path.relative_to(ROOT)} is missing story export: {story_name}", errors)
+            fail(f"{label} is missing story export: {story_name}", errors)
 
-    validate_text_file(path, required_markers, errors)
+    for marker in required_markers:
+        if marker not in text:
+            fail(f"{label} is missing expected content: {marker}", errors)
+
+
+def validate_csf_story_file(path: Path, required_stories: list[str], required_markers: list[str], errors: list[str]) -> None:
+    validate_csf_story_text(
+        str(path.relative_to(ROOT)),
+        path.read_text(encoding="utf-8"),
+        required_stories,
+        required_markers,
+        errors,
+    )
 
 
 def validate_svelte_story_file(path: Path, required_stories: list[str], required_markers: list[str], errors: list[str]) -> None:
@@ -191,6 +223,19 @@ def validate_svelte_story_file(path: Path, required_stories: list[str], required
     validate_text_file(path, required_markers, errors)
 
 
+def validate_mdx_story_file(path: Path, required_markers: list[str], errors: list[str]) -> None:
+    text = path.read_text(encoding="utf-8")
+    label = str(path.relative_to(ROOT))
+
+    for marker in ("@storybook/blocks", "<Meta"):
+        if marker not in text:
+            fail(f"{label} is missing marker: {marker}", errors)
+
+    for marker in required_markers:
+        if marker not in text:
+            fail(f"{label} is missing expected content: {marker}", errors)
+
+
 def validate_story_like_cases(cases: dict[str, object], errors: list[str]) -> None:
     for section_name in ("stories", "templates"):
         for case in cases.get(section_name, []):
@@ -203,6 +248,8 @@ def validate_story_like_cases(cases: dict[str, object], errors: list[str]) -> No
                 validate_csf_story_file(path, case.get("requiredStories", []), case.get("requiredMarkers", []), errors)
             elif format_name == "svelte-csf":
                 validate_svelte_story_file(path, case.get("requiredStories", []), case.get("requiredMarkers", []), errors)
+            elif format_name == "mdx":
+                validate_mdx_story_file(path, case.get("requiredMarkers", []), errors)
             elif format_name == "text":
                 validate_text_file(path, case.get("requiredMarkers", []), errors)
             else:
@@ -480,10 +527,102 @@ def validate_diff_updates(cases: dict[str, object], errors: list[str]) -> None:
             story_path.write_text(original_story, encoding="utf-8")
 
 
+def validate_docs(cases: dict[str, object], errors: list[str]) -> None:
+    docs_script = SKILL_SCRIPTS / "story_docs.py"
+    for case in cases.get("docs", []):
+        component_path = ROOT / case["component"]
+        if not component_path.exists():
+            fail(f"Missing docs component fixture: {case['component']}", errors)
+            continue
+
+        command = [
+            sys.executable,
+            str(docs_script),
+            str(component_path),
+            "--format",
+            "json",
+            "--style",
+            case.get("style", "auto"),
+        ]
+        if case.get("repoRoot"):
+            command.extend(["--repo-root", str(ROOT / case["repoRoot"])])
+        if case.get("storyPath"):
+            command.extend(["--story-path", str(ROOT / case["storyPath"])])
+
+        payload = run_json(command, errors, f"Docs {case['name']}")
+        if payload is None:
+            continue
+
+        expected_style = case.get("style")
+        if expected_style and payload.get("style") != expected_style:
+            fail(
+                f"Docs {case['name']} returned style {payload.get('style')} instead of {expected_style}",
+                errors,
+            )
+
+        expected_title = case.get("expectedTitle")
+        if expected_title and payload.get("title") != expected_title:
+            fail(
+                f"Docs {case['name']} returned title {payload.get('title')} instead of {expected_title}",
+                errors,
+            )
+
+        documentation = payload.get("documentation", {})
+        pattern_names = [pattern.get("name") for pattern in documentation.get("usagePatterns", [])]
+        for pattern_name in case.get("expectedPatternNames", []):
+            if pattern_name not in pattern_names:
+                fail(f"Docs {case['name']} is missing usage pattern: {pattern_name}", errors)
+
+        rendered = str(payload.get("rendered", ""))
+        if payload.get("style") == "csf":
+            validate_csf_story_text(
+                f"docs output {case['name']}",
+                rendered,
+                case.get("requiredStories", []),
+                case.get("requiredMarkers", []),
+                errors,
+            )
+        elif payload.get("style") == "mdx":
+            for marker in ("@storybook/blocks", "<Meta"):
+                if marker not in rendered:
+                    fail(f"docs output {case['name']} is missing marker: {marker}", errors)
+            for marker in case.get("requiredMarkers", []):
+                if marker not in rendered:
+                    fail(f"docs output {case['name']} is missing expected content: {marker}", errors)
+        else:
+            fail(f"Docs {case['name']} returned unknown style: {payload.get('style')}", errors)
+
+        markdown_markers = case.get("expectedMarkdownMarkers", [])
+        if markdown_markers:
+            md_command = [
+                sys.executable,
+                str(docs_script),
+                str(component_path),
+                "--format",
+                "markdown",
+                "--style",
+                case.get("style", "auto"),
+            ]
+            if case.get("repoRoot"):
+                md_command.extend(["--repo-root", str(ROOT / case["repoRoot"])])
+            if case.get("storyPath"):
+                md_command.extend(["--story-path", str(ROOT / case["storyPath"])])
+
+            md_result = subprocess.run(md_command, capture_output=True, text=True, check=False)
+            if md_result.returncode != 0:
+                fail(f"Docs markdown run failed for {case['name']}: {md_result.stdout}{md_result.stderr}", errors)
+                continue
+
+            for marker in markdown_markers:
+                if marker not in md_result.stdout:
+                    fail(f"Docs {case['name']} markdown is missing marker: {marker}", errors)
+
+
 def validate_viewer(errors: list[str]) -> None:
     viewer_js = (ROOT / "tools" / "fixtures-viewer" / "app.js").read_text(encoding="utf-8")
+    viewer_html = (ROOT / "tools" / "fixtures-viewer" / "index.html").read_text(encoding="utf-8")
     for marker in ("fixtures/cases.json", "Load local JSON", "renderContract"):
-        if marker not in viewer_js and marker not in (ROOT / "tools" / "fixtures-viewer" / "index.html").read_text(encoding="utf-8"):
+        if marker not in viewer_js and marker not in viewer_html:
             fail(f"Fixtures viewer is missing expected content: {marker}", errors)
 
 
@@ -530,6 +669,7 @@ def main() -> int:
     validate_compositions(cases, errors)
     validate_decorators(cases, errors)
     validate_diff_updates(cases, errors)
+    validate_docs(cases, errors)
     validate_viewer(errors)
     validate_watch_mode(errors)
 

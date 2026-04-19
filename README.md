@@ -1,10 +1,12 @@
 # Storybook Codex
 
-`storybook-codex` is a plugin-ready Codex package for Storybook work that now goes well beyond "write a `.stories.tsx` file."
+`storybook-codex` is a plugin-ready Codex package for Storybook work that goes well beyond "write a `.stories.tsx` file."
 
 It gives Codex one focused skill that can:
 
 - create or update React, Vue, and Svelte Storybook stories
+- generate dedicated docs pages in `.stories.mdx`
+- generate docs-tagged CSF stories with `parameters.docs.description`
 - suggest parent-context stories from real component usage
 - update only affected stories from git diff signals
 - generate Storybook preview decorators from app providers
@@ -21,6 +23,7 @@ It gives Codex one focused skill that can:
 Most Storybook prompts stop at "make a story file." This skill pushes further:
 
 - `story_blueprint.py` is repo-aware, not just prop-aware. It mines usage, co-occurrence, branchy props, interaction flows, a11y lenses, and visual baselines.
+- `story_docs.py` turns component APIs and real usage into practical docs pages or docs-tagged stories instead of leaving documentation to hand-written prose.
 - `story_composition.py` finds the parent contexts components actually ship inside, then turns those into wrapper-story suggestions.
 - `story_diff_update.py` reads git diff output and updates only the stories that were affected by a component API change.
 - `storybook_decorators.py` inspects app providers and emits preview decorators or Vue setup hooks instead of forcing teams to hand-roll them again.
@@ -34,15 +37,17 @@ Most Storybook prompts stop at "make a story file." This skill pushes further:
 - `.codex-plugin/plugin.json` for plugin packaging
 - `skills/storybook-codex/` with the actual Codex skill
 - `skills/storybook-codex/scripts/story_blueprint.py` for blueprinting, review mode, and watch mode
+- `skills/storybook-codex/scripts/story_docs.py` for docs-mode generation
 - `skills/storybook-codex/scripts/story_composition.py` for parent-context story discovery
 - `skills/storybook-codex/scripts/story_diff_update.py` for change-aware story maintenance from git diff
 - `skills/storybook-codex/scripts/storybook_decorators.py` for `.storybook/preview` scaffolding from provider trees
 - `skills/storybook-codex/scripts/storybook_audit.py` for repo-wide Storybook scoring
 - `skills/storybook-codex/scripts/story_sync.py` for multi-framework story mirroring
 - `skills/storybook-codex/scripts/token_catalog.py` for token-aware globals
-- `skills/storybook-codex/references/` for framework rules, visual diff, interaction, a11y, token, audit, and Storybook 9 guidance
-- `skills/storybook-codex/assets/templates/` for standard stories, interaction stories, visual regression specs, token preview config, and library-specific starters
+- `skills/storybook-codex/references/` for framework rules, docs mode, visual diff, interaction, a11y, token, audit, and Storybook 9 guidance
+- `skills/storybook-codex/assets/templates/` for standard stories, docs stories, interaction stories, visual regression specs, token preview config, and library-specific starters
 - `fixtures/cases.json` as the machine-readable validation contract
+- `fixtures/docs-sample/` as docs-mode sample fixtures
 - `tools/fixtures-viewer/` as a browsable UI for that contract
 - `scripts/validate_storybook_codex.py` for zero-dependency validation
 
@@ -59,6 +64,25 @@ Useful flags:
 - `--repo-root <path>` to mine usage in the local app
 - `--review-story path/to/Component.stories.tsx` to critique an existing story file
 - `--watch` to rerun the blueprint while the component changes
+
+### Generate documentation stories
+
+```sh
+python3 skills/storybook-codex/scripts/story_docs.py path/to/Component.tsx --style csf
+```
+
+or:
+
+```sh
+python3 skills/storybook-codex/scripts/story_docs.py path/to/Component.tsx --style mdx
+```
+
+Use this when autodocs is too thin and the component needs:
+
+- purpose and anti-pattern guidance
+- prop decision guidance
+- two or three common usage snippets
+- a docs-tagged CSF story or a dedicated `.stories.mdx` page
 
 ### Suggest composition stories
 
@@ -111,6 +135,7 @@ python3 skills/storybook-codex/scripts/story_sync.py src/Button.stories.tsx --ta
 - expected story exports and markers
 - template markers
 - blueprint expectations
+- docs-generator expectations
 - composition-story expectations
 - decorator preview expectations
 - diff-update expectations
@@ -123,13 +148,15 @@ The viewer at `tools/fixtures-viewer/index.html` reads that contract and turns i
 
 ## Roadmap signal
 
-The current release already covers React, Vue, and Svelte story generation. The next layer is deeper parity for composition, diff, and global-decorator flows across Vue and Svelte packages so multi-framework design systems can keep one review standard.
+The current release already covers React, Vue, and Svelte story generation. The next layer is deeper parity for docs, composition, diff, and global-decorator flows across Vue and Svelte packages so multi-framework design systems can keep one review standard.
 
 ## Example prompts
 
 - `Use $storybook-codex to create stories for src/components/Button.tsx.`
 - `Use $storybook-codex to review src/components/Dialog.stories.tsx and raise story health.`
 - `Use $storybook-codex to add interaction stories and visual regression coverage for the modal.`
+- `Use $storybook-codex to generate a `.stories.mdx` docs page for src/components/ActionButton.tsx.`
+- `Use $storybook-codex to add a docs-only story with parameters.docs.description for src/components/InfoPanel.vue.`
 - `Use $storybook-codex to suggest composition stories for CheckoutButton from the real checkout flow.`
 - `Use $storybook-codex to update stories for changed components from git diff on this branch.`
 - `Use $storybook-codex to generate .storybook/preview.tsx decorators from our app providers.`
@@ -177,8 +204,14 @@ Platform notes:
 
 GitHub Actions runs the same validator in CI.
 
+You can inspect docs mode directly:
+
+```sh
+python3 skills/storybook-codex/scripts/story_docs.py fixtures/docs-sample/ActionButton.tsx --repo-root fixtures/docs-sample --story-path fixtures/docs-sample/ActionButton.stories.tsx --style mdx
+```
+
 ## Scope
 
 This repo is intentionally narrow. It is not a generic frontend design skill and it is not a framework-agnostic styling assistant.
 
-It is for Storybook authoring, review, migration, visual QA, and documentation across the UI stacks most design-system teams actually ship today: React, Vue, and Svelte.
+It is for Storybook authoring, documentation, review, migration, visual QA, and automation across the UI stacks most design-system teams actually ship today: React, Vue, and Svelte.

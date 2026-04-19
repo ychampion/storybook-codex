@@ -193,6 +193,39 @@
         "FocusTrap",
         "storybook/test"
       ]
+    },
+    {
+      "name": "component-docs-template",
+      "format": "csf",
+      "story": "skills/storybook-codex/assets/templates/component.docs.stories.tsx",
+      "allowPlaceholders": true,
+      "requiredStories": ["Documentation"],
+      "requiredMarkers": [
+        "__COMPONENT_NAME__",
+        "__COMPONENT_IMPORT_PATH__",
+        "__DOCS_TITLE__",
+        "tags: ['autodocs']",
+        "## When to use",
+        "## When not to use",
+        "## Prop decision guidance",
+        "source: {"
+      ]
+    },
+    {
+      "name": "component-docs-mdx-template",
+      "format": "mdx",
+      "story": "skills/storybook-codex/assets/templates/component.docs.stories.mdx",
+      "allowPlaceholders": true,
+      "requiredMarkers": [
+        "@storybook/blocks",
+        "__COMPONENT_NAME__",
+        "__COMPONENT_STORIES_IMPORT__",
+        "__DOCS_TITLE__",
+        "## Purpose",
+        "## When to use",
+        "## Prop decision guidance",
+        "## Common usage patterns"
+      ]
     }
   ],
   "blueprints": [
@@ -371,6 +404,73 @@
       "expectedAddedStories": ["Loading"],
       "expectedRemovedWarnings": ["selected"],
       "expectedRenameWarnings": ["tone", "variant"]
+    }
+  ],
+  "docs": [
+    {
+      "name": "action-button-docs-csf",
+      "component": "fixtures/docs-sample/ActionButton.tsx",
+      "repoRoot": "fixtures/docs-sample",
+      "storyPath": "fixtures/docs-sample/ActionButton.stories.tsx",
+      "style": "csf",
+      "expectedTitle": "Docs/ActionButton/Docs",
+      "requiredStories": ["Documentation"],
+      "requiredMarkers": [
+        "parameters: {",
+        "docs: {",
+        "description: {",
+        "component:",
+        "export const Documentation: Story = {",
+        "name: 'Docs'",
+        "source: {",
+        "## Purpose",
+        "## When to use",
+        "## When not to use",
+        "## Prop decision guidance",
+        "## Common usage patterns"
+      ],
+      "expectedPatternNames": ["Primary action", "Busy state", "Disabled action"],
+      "expectedMarkdownMarkers": [
+        "# ActionButton docs plan",
+        "## Purpose",
+        "## When to use",
+        "## Prop decision guidance",
+        "### Primary action",
+        "### Busy state",
+        "### Disabled action"
+      ]
+    },
+    {
+      "name": "action-button-docs-mdx",
+      "component": "fixtures/docs-sample/ActionButton.tsx",
+      "repoRoot": "fixtures/docs-sample",
+      "storyPath": "fixtures/docs-sample/ActionButton.stories.tsx",
+      "style": "mdx",
+      "expectedTitle": "Docs/ActionButton/Docs",
+      "requiredMarkers": [
+        "@storybook/blocks",
+        "<Meta",
+        "<Canvas of={ComponentStories.Default} />",
+        "<Controls of={ComponentStories.Default} />",
+        "<Source code={",
+        "## Purpose",
+        "## When to use",
+        "## When not to use",
+        "## Prop decision guidance",
+        "## Preview",
+        "## Controls",
+        "## Common usage patterns"
+      ],
+      "expectedPatternNames": ["Primary action", "Busy state", "Disabled action"],
+      "expectedMarkdownMarkers": [
+        "# ActionButton docs plan",
+        "## Purpose",
+        "## When to use",
+        "## Prop decision guidance",
+        "### Primary action",
+        "### Busy state",
+        "### Disabled action"
+      ]
     }
   ]
 }

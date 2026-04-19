@@ -1,14 +1,17 @@
 ---
 name: storybook-codex
-description: Create, review, sync, and audit React, Vue, and Svelte Storybook stories with controls, composition stories, diff-aware updates, play functions, visual diff hooks, design-token globals, provider decorators, and optional Chromatic scaffolding. Use when the task mentions Storybook, stories, `.stories.tsx`, `.stories.ts`, `.stories.svelte`, `argTypes`, `CSF`, `play()`, addon-a11y, Chromatic, visual regression, story health, story audit, preview decorators, providers, git diff story updates, or syncing stories between frameworks. Do not use for generic UI design, framework-agnostic styling tasks, or non-Storybook component work.
+description: Create, document, compose, update, review, sync, and audit React, Vue, and Svelte Storybook stories with controls, docs pages, docs-tagged story blocks, composition stories, diff-aware updates, play functions, visual diff hooks, design-token globals, provider decorators, and optional Chromatic scaffolding. Use when the task mentions Storybook, stories, `.stories.tsx`, `.stories.ts`, `.stories.svelte`, `.stories.mdx`, `argTypes`, `CSF`, `autodocs`, `parameters.docs.description`, `play()`, addon-a11y, Chromatic, visual regression, story health, story audit, preview decorators, providers, git diff story updates, Storybook component documentation, or syncing stories between frameworks. Do not use for generic UI design, framework-agnostic styling tasks, or non-Storybook component work.
 triggers:
   - stories
   - storybook
   - .stories.tsx
   - .stories.ts
   - .stories.svelte
+  - .stories.mdx
   - argTypes
   - CSF
+  - autodocs
+  - parameters.docs.description
   - play()
   - Chromatic
   - visual regression
@@ -21,22 +24,25 @@ triggers:
 
 # Storybook Codex
 
-Create or update React, Vue, and Svelte Storybook stories, then review or audit them when the repo already has Storybook coverage.
+Create, document, update, review, sync, and audit Storybook work across React, Vue, and Svelte.
 
-Use this skill for Storybook authoring and maintenance across React, Vue, and Svelte:
+Use this skill for Storybook authoring and maintenance across the UI stacks design-system teams actually ship:
 
 - React components and `.stories.tsx`
 - Vue single-file components and `.stories.ts`
 - Svelte components and `.stories.svelte` when the repo uses native Svelte CSF
+- `.stories.mdx` docs pages or docs-tagged CSF stories when autodocs alone is not enough
 
 ## Default behavior
 
 1. Inspect the repo before editing anything.
 2. Detect the framework, Storybook version, title conventions, preview globals, and existing story style before choosing a format.
-3. Detect provider trees, token globals, and parent-context usage before generating wrapper stories or preview decorators.
-4. Prefer updating the local convention over imposing a generic template.
-5. Keep stories compact and editorial instead of generating prop cartesian products.
-6. Use `storybook/test` for `fn`, `userEvent`, `within`, and `expect` when the story needs action logging or a `play()` flow.
+3. Detect provider trees, token globals, parent-context usage, and existing docs conventions before generating wrapper stories, docs pages, or preview decorators.
+4. If the task needs deterministic analysis before editing, run `story_blueprint.py`.
+5. If the task is documentation-heavy, run `story_docs.py`.
+6. Prefer updating the local convention over imposing a generic template.
+7. Keep stories and docs compact, editorial, and reviewable instead of generating prop cartesian products.
+8. Use `storybook/test` for `fn`, `userEvent`, `within`, and `expect` when the story needs action logging or a `play()` flow.
 
 ## Built-in modes
 
@@ -48,7 +54,7 @@ Use the blueprint helper when you need deterministic analysis before writing sto
 python3 skills/storybook-codex/scripts/story_blueprint.py path/to/Component.tsx
 ```
 
-It can now do more than prop inventory:
+It can:
 
 - suggest stories by lens
 - mine usage signals from the repo
@@ -64,6 +70,26 @@ Useful flags:
 - `--repo-root <path>` for usage mining
 - `--review-story path/to/Component.stories.tsx` for a deterministic story critique
 - `--watch` for active component work
+
+### Docs mode
+
+Use docs mode when autodocs is not enough and the component needs purpose, usage guidance, or implementation snippets.
+
+```sh
+python3 skills/storybook-codex/scripts/story_docs.py path/to/Component.tsx
+```
+
+Prefer:
+
+- a docs-tagged CSF story when the repo keeps everything in `.stories.tsx` or `.stories.ts`
+- a `.stories.mdx` page when the repo already uses docs blocks or when Svelte docs should stay separate from story syntax
+
+Docs mode should:
+
+- reuse the existing story title when possible and append `/Docs`
+- mine two or three real usage snippets from the repo before inventing examples
+- generate purpose, when-to-use, when-not-to-use, and prop decision guidance
+- use `parameters.docs.description` for CSF docs output instead of long comments in the story body
 
 ### Composition mode
 
@@ -190,6 +216,7 @@ Do not force every lens into every component. Use the smallest set that makes th
 - Read [references/svelte-stories.md](references/svelte-stories.md) for native Svelte CSF.
 - Read [references/story-design-lenses.md](references/story-design-lenses.md) when deciding which stories matter.
 - Read [references/controls-and-autodocs.md](references/controls-and-autodocs.md) for controls, autodocs, and action args.
+- Read [references/documentation-stories.md](references/documentation-stories.md) for MDX vs CSF docs decisions and editorial guidance.
 - Read [references/interaction-stories.md](references/interaction-stories.md) for `play()` heuristics.
 - Read [references/accessibility-stories.md](references/accessibility-stories.md) for a11y stories and WCAG-oriented checks.
 - Read [references/visual-diff.md](references/visual-diff.md) for screenshot strategy.
