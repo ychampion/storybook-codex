@@ -178,6 +178,17 @@ Those templates intentionally cover the awkward parts that generic story generat
 
 The repo now defaults to `storybook/test` instead of `@storybook/test`, keeps object stories first, and includes explicit Storybook 9 readiness guidance so migrations happen while touching real files, not as busywork.
 
+## Try the demo locally
+
+A zero-build demo under [`demo/`](demo/) shows what a developer actually sees after running the skill — live rendered stories, the generated `.stories.*` file, the component source, and the blueprint report, for all six repo fixtures (React, Vue, Svelte).
+
+```sh
+python demo/build.py
+python -m http.server 8765 --directory demo
+```
+
+Open http://localhost:8765. See [demo/README.md](demo/README.md) for details.
+
 ## Install locally
 
 Clone the repo and either copy or symlink `skills/storybook-codex` into your Codex skills directory.
