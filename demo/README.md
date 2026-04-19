@@ -9,12 +9,17 @@ Static, zero-build demo that shows what a developer actually gets after running 
 
 ## Build and view
 
+From the repo root:
+
 ```sh
 python demo/build.py
 python -m http.server 8765 --directory demo
 ```
 
 Then open http://localhost:8765.
+
+`build.py` locates the repo root automatically, so it works from other
+working directories too.
 
 ## Coverage
 

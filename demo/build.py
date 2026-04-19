@@ -106,15 +106,51 @@ def extract_balanced_object(text: str, start: int) -> str | None:
 
 
 def find_args_body(object_body: str) -> str | None:
-    """Given the body of an object literal, return the body of its ``args``
-    object, or None if no ``args`` property is present."""
-    match = ARGS_KEY_RE.search(object_body)
-    if not match:
-        return None
-    brace_index = object_body.find("{", match.end() - 1)
-    if brace_index == -1:
-        return None
-    return extract_balanced_object(object_body, brace_index)
+    """Given the body of an object literal, return the body of its top-level
+    ``args`` property (as the inner body of its ``{...}`` value). Skips any
+    ``args`` key that appears inside a nested object or array, so things like
+    ``parameters.docs.story.args`` do not shadow the real story args."""
+    depth = 0
+    i = 0
+    in_str: str | None = None
+    while i < len(object_body):
+        ch = object_body[i]
+        if in_str:
+            if ch == "\\" and i + 1 < len(object_body):
+                i += 2
+                continue
+            if ch == in_str:
+                in_str = None
+            i += 1
+            continue
+        if ch in ("'", '"'):
+            in_str = ch
+            i += 1
+            continue
+        if ch in "{[":
+            depth += 1
+            i += 1
+            continue
+        if ch in "}]":
+            depth -= 1
+            i += 1
+            continue
+        if depth == 0 and ch == "a" and object_body.startswith("args", i):
+            before_start = i == 0 or not object_body[i - 1].isalnum() and object_body[i - 1] != "_"
+            after_end = i + 4 >= len(object_body) or not object_body[i + 4].isalnum() and object_body[i + 4] != "_"
+            if before_start and after_end:
+                j = i + 4
+                while j < len(object_body) and object_body[j].isspace():
+                    j += 1
+                if j < len(object_body) and object_body[j] == ":":
+                    j += 1
+                    while j < len(object_body) and object_body[j].isspace():
+                        j += 1
+                    if j < len(object_body) and object_body[j] == "{":
+                        return extract_balanced_object(object_body, j)
+                    return None
+        i += 1
+    return None
 
 
 def find_repo_root(start: Path) -> Path:

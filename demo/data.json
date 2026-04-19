@@ -1,6 +1,6 @@
 {
   "title": "Storybook Codex - Story Outcomes",
-  "generatedAt": "2026-04-19T22:30:30.096097+00:00",
+  "generatedAt": "2026-04-19T22:49:02.691408+00:00",
   "componentCount": 6,
   "components": [
     {
@@ -9,7 +9,7 @@
       "componentPath": "fixtures/basic-button/Button.tsx",
       "componentSource": "import type { ReactNode } from 'react';\n\nexport type ButtonProps = {\n  children: ReactNode;\n  size?: 'sm' | 'md' | 'lg';\n  tone?: 'neutral' | 'brand' | 'danger';\n  disabled?: boolean;\n  loading?: boolean;\n  onClick?: () => void;\n};\n\nexport function Button({\n  children,\n  size = 'md',\n  tone = 'neutral',\n  disabled = false,\n  loading = false,\n  onClick,\n}: ButtonProps) {\n  const label = loading ? 'Working...' : children;\n\n  return (\n    <button\n      data-size={size}\n      data-tone={tone}\n      disabled={disabled || loading}\n      onClick={onClick}\n      type=\"button\"\n    >\n      {label}\n    </button>\n  );\n}\n\n",
       "storyPath": "fixtures/basic-button/Button.expected.stories.tsx",
-      "storySource": "import type { Meta, StoryObj } from '@storybook/react';\nimport { fn } from '@storybook/test';\n\nimport { Button } from './Button';\n\nconst meta = {\n  title: 'Fixtures/Button',\n  component: Button,\n  tags: ['autodocs'],\n  args: {\n    children: 'Save changes',\n    size: 'md',\n    tone: 'neutral',\n    onClick: fn(),\n  },\n  argTypes: {\n    size: {\n      control: 'radio',\n      options: ['sm', 'md', 'lg'],\n    },\n    tone: {\n      control: 'inline-radio',\n      options: ['neutral', 'brand', 'danger'],\n    },\n    onClick: {\n      control: false,\n    },\n  },\n} satisfies Meta<typeof Button>;\n\nexport default meta;\ntype Story = StoryObj<typeof meta>;\n\nexport const Default: Story = {};\n\nexport const Brand: Story = {\n  args: {\n    tone: 'brand',\n  },\n};\n\nexport const Disabled: Story = {\n  args: {\n    disabled: true,\n  },\n};\n\nexport const Loading: Story = {\n  args: {\n    loading: true,\n  },\n};\n\nexport const Large: Story = {\n  args: {\n    size: 'lg',\n  },\n};\n\n",
+      "storySource": "import type { Meta, StoryObj } from '@storybook/react';\nimport { fn } from 'storybook/test';\n\nimport { Button } from './Button';\n\nconst meta = {\n  title: 'Fixtures/Button',\n  component: Button,\n  tags: ['autodocs'],\n  args: {\n    children: 'Save changes',\n    size: 'md',\n    tone: 'neutral',\n    onClick: fn(),\n  },\n  argTypes: {\n    size: {\n      control: 'radio',\n      options: ['sm', 'md', 'lg'],\n    },\n    tone: {\n      control: 'inline-radio',\n      options: ['neutral', 'brand', 'danger'],\n    },\n    onClick: {\n      control: false,\n    },\n  },\n} satisfies Meta<typeof Button>;\n\nexport default meta;\ntype Story = StoryObj<typeof meta>;\n\nexport const Default: Story = {};\n\nexport const Brand: Story = {\n  args: {\n    tone: 'brand',\n  },\n};\n\nexport const Disabled: Story = {\n  args: {\n    disabled: true,\n  },\n};\n\nexport const Loading: Story = {\n  args: {\n    loading: true,\n  },\n};\n\nexport const Large: Story = {\n  args: {\n    size: 'lg',\n  },\n};\n",
       "metaArgs": {
         "children": "Save changes",
         "size": "md",
@@ -52,10 +52,12 @@
         "component": "Button",
         "componentPath": "C:\\Users\\gamin\\storybook-codex\\fixtures\\basic-button\\Button.tsx",
         "framework": "react",
+        "repoRoot": "C:\\Users\\gamin\\storybook-codex",
         "props": [
           {
             "name": "children",
             "type": "ReactNode",
+            "optional": false,
             "options": [],
             "isEvent": false,
             "isHidden": false
@@ -63,6 +65,7 @@
           {
             "name": "size",
             "type": "'sm' | 'md' | 'lg'",
+            "optional": true,
             "options": [
               "sm",
               "md",
@@ -74,6 +77,7 @@
           {
             "name": "tone",
             "type": "'neutral' | 'brand' | 'danger'",
+            "optional": true,
             "options": [
               "neutral",
               "brand",
@@ -85,6 +89,7 @@
           {
             "name": "disabled",
             "type": "boolean",
+            "optional": true,
             "options": [],
             "isEvent": false,
             "isHidden": false
@@ -92,6 +97,7 @@
           {
             "name": "loading",
             "type": "boolean",
+            "optional": true,
             "options": [],
             "isEvent": false,
             "isHidden": false
@@ -99,6 +105,7 @@
           {
             "name": "onClick",
             "type": "() => void",
+            "optional": true,
             "options": [],
             "isEvent": true,
             "isHidden": false
@@ -106,8 +113,10 @@
         ],
         "defaultArgs": {
           "children": "Preview",
-          "size": "sm",
-          "tone": "neutral"
+          "size": "md",
+          "tone": "neutral",
+          "disabled": false,
+          "loading": false
         },
         "controls": {
           "size": {
@@ -137,19 +146,11 @@
             "lens": "baseline"
           },
           {
-            "name": "Small",
-            "lens": "decision"
-          },
-          {
             "name": "Large",
             "lens": "decision"
           },
           {
             "name": "Brand",
-            "lens": "decision"
-          },
-          {
-            "name": "Danger",
             "lens": "decision"
           },
           {
@@ -166,18 +167,172 @@
           }
         ],
         "notes": [
-          "Use fn() for event handlers and hide direct controls for them.",
-          "Prefer one or two decision stories over rendering every enum combination."
+          "Use fn() from storybook/test for event handlers and hide direct controls for them.",
+          "Prefer one or two decision stories over rendering every enum combination.",
+          "Bias stories toward prop combinations already used together in the app.",
+          "Props that gate conditional branches deserve explicit state or boundary stories.",
+          "Add at least one parent-context story so the component is reviewed where it actually ships."
         ],
         "lenses": [
           "baseline",
           "decision",
           "state",
           "boundary",
-          "action"
-        ]
+          "action",
+          "a11y",
+          "visual"
+        ],
+        "usageSignals": {
+          "filesScanned": 28,
+          "matches": 2,
+          "props": [
+            {
+              "prop": "tone",
+              "count": 2
+            },
+            {
+              "prop": "disabled",
+              "count": 1
+            },
+            {
+              "prop": "loading",
+              "count": 1
+            },
+            {
+              "prop": "onClick",
+              "count": 1
+            },
+            {
+              "prop": "size",
+              "count": 1
+            }
+          ],
+          "cooccurrence": [
+            {
+              "pair": "disabled + loading",
+              "count": 1
+            },
+            {
+              "pair": "disabled + tone",
+              "count": 1
+            },
+            {
+              "pair": "loading + tone",
+              "count": 1
+            },
+            {
+              "pair": "onClick + size",
+              "count": 1
+            },
+            {
+              "pair": "onClick + tone",
+              "count": 1
+            }
+          ],
+          "examples": [
+            {
+              "file": "fixtures/basic-button/ButtonUsage.tsx",
+              "props": [
+                "onClick",
+                "size",
+                "tone"
+              ]
+            },
+            {
+              "file": "fixtures/basic-button/ButtonUsage.tsx",
+              "props": [
+                "disabled",
+                "loading",
+                "tone"
+              ]
+            }
+          ]
+        },
+        "compositionStories": [
+          {
+            "storyName": "InButtonUsage",
+            "parentComponent": "ButtonUsage",
+            "parentFile": "fixtures/basic-button/ButtonUsage.tsx",
+            "layout": "inline parent context",
+            "args": {
+              "size": "lg",
+              "tone": "brand"
+            },
+            "bindings": {
+              "onClick": "() => undefined"
+            },
+            "siblingComponents": [],
+            "wrappers": [],
+            "confidence": 75
+          },
+          {
+            "storyName": "InButtonUsageButtonUsage",
+            "parentComponent": "ButtonUsage",
+            "parentFile": "fixtures/basic-button/ButtonUsage.tsx",
+            "layout": "inline parent context",
+            "args": {
+              "disabled": true,
+              "loading": true,
+              "tone": "danger"
+            },
+            "bindings": {},
+            "siblingComponents": [],
+            "wrappers": [],
+            "confidence": 70
+          }
+        ],
+        "branchSignals": [
+          {
+            "prop": "loading",
+            "count": 1,
+            "reason": "state gate"
+          }
+        ],
+        "interactionStories": [
+          {
+            "storyName": "ClickFlow",
+            "handler": "onClick",
+            "steps": [
+              "click the primary trigger"
+            ],
+            "assertion": "assert onClick was called",
+            "import": "storybook/test"
+          }
+        ],
+        "accessibilityStories": [
+          {
+            "storyName": "BusyAndDisabledStates",
+            "focus": "Disabled semantics and busy messaging",
+            "wcag": [
+              "4.1.2",
+              "3.3.2"
+            ]
+          }
+        ],
+        "visualDiff": {
+          "mode": "visual-regression-codex",
+          "harnesses": [
+            "Chromatic",
+            "Playwright screenshot test"
+          ],
+          "captureStories": [
+            "Default",
+            "Large",
+            "Brand",
+            "Disabled",
+            "Loading",
+            "LongContent"
+          ],
+          "interactionStories": [
+            "ClickFlow"
+          ],
+          "notes": [
+            "Capture the stable default story first, then branch states that change layout or density.",
+            "Keep local screenshot thresholds narrow when stories are token-aware or theme-aware."
+          ]
+        }
       },
-      "blueprintMarkdown": "# Button blueprint\n\n_Framework_: react\n\n## Props\n- `children`: `ReactNode`\n- `size`: `'sm' | 'md' | 'lg'`\n- `tone`: `'neutral' | 'brand' | 'danger'`\n- `disabled`: `boolean`\n- `loading`: `boolean`\n- `onClick`: `() => void` _(event)_\n\n## Default args\n- `children`: \"Preview\"\n- `size`: \"sm\"\n- `tone`: \"neutral\"\n\n## Controls\n- `size`: {\"control\": \"radio\", \"options\": [\"sm\", \"md\", \"lg\"]}\n- `tone`: {\"control\": \"inline-radio\", \"options\": [\"neutral\", \"brand\", \"danger\"]}\n- `onClick`: {\"control\": false, \"useFn\": true}\n\n## Recommended stories\n- Default (baseline)\n- Small (decision)\n- Large (decision)\n- Brand (decision)\n- Danger (decision)\n- Disabled (state)\n- Loading (state)\n- LongContent (boundary)\n\n## Notes\n- Use fn() for event handlers and hide direct controls for them.\n- Prefer one or two decision stories over rendering every enum combination."
+      "blueprintMarkdown": "# Button blueprint\n\n_Framework_: react\n\n## Props\n- `children`: `ReactNode`\n- `size`: `'sm' | 'md' | 'lg'` _(optional)_\n- `tone`: `'neutral' | 'brand' | 'danger'` _(optional)_\n- `disabled`: `boolean` _(optional)_\n- `loading`: `boolean` _(optional)_\n- `onClick`: `() => void` _(optional, event)_\n\n## Default args\n- `children`: \"Preview\"\n- `size`: \"md\"\n- `tone`: \"neutral\"\n- `disabled`: false\n- `loading`: false\n\n## Controls\n- `size`: {\"control\": \"radio\", \"options\": [\"sm\", \"md\", \"lg\"]}\n- `tone`: {\"control\": \"inline-radio\", \"options\": [\"neutral\", \"brand\", \"danger\"]}\n- `onClick`: {\"control\": false, \"useFn\": true}\n\n## Recommended stories\n- Default (baseline)\n- Large (decision)\n- Brand (decision)\n- Disabled (state)\n- Loading (state)\n- LongContent (boundary)\n\n## Usage signals\n- Matches found: 2 across 28 scanned files\n- `tone` appears in 2 usage sites\n- `disabled` appears in 1 usage sites\n- `loading` appears in 1 usage sites\n- `onClick` appears in 1 usage sites\n- `size` appears in 1 usage sites\n- Co-occurs: `disabled + loading` (1)\n- Co-occurs: `disabled + tone` (1)\n- Co-occurs: `loading + tone` (1)\n\n## Composition stories\n- InButtonUsage: inline parent context; fixtures/basic-button/ButtonUsage.tsx; size=\"lg\", tone=\"brand\"; bindings: onClick\n- InButtonUsageButtonUsage: inline parent context; fixtures/basic-button/ButtonUsage.tsx; disabled=true, loading=true, tone=\"danger\"\n\n## Branch signals\n- `loading`: state gate (1)\n\n## Interaction stories\n- ClickFlow: click the primary trigger -> assert onClick was called\n\n## Accessibility stories\n- BusyAndDisabledStates: Disabled semantics and busy messaging (WCAG 4.1.2, 3.3.2)\n\n## Visual diff plan\n- Harnesses: Chromatic, Playwright screenshot test\n- Capture: Default, Large, Brand, Disabled, Loading, LongContent\n\n## Notes\n- Use fn() from storybook/test for event handlers and hide direct controls for them.\n- Prefer one or two decision stories over rendering every enum combination.\n- Bias stories toward prop combinations already used together in the app.\n- Props that gate conditional branches deserve explicit state or boundary stories.\n- Add at least one parent-context story so the component is reviewed where it actually ships."
     },
     {
       "name": "Alert",
@@ -185,7 +340,7 @@
       "componentPath": "fixtures/alert/Alert.tsx",
       "componentSource": "export type AlertProps = {\n  title: string;\n  message: string;\n  tone?: 'info' | 'success' | 'danger';\n  dismissible?: boolean;\n  onDismiss?: () => void;\n  className?: string;\n};\n\nexport function Alert({\n  title,\n  message,\n  tone = 'info',\n  dismissible = false,\n  onDismiss,\n  className,\n}: AlertProps) {\n  return (\n    <section className={className} data-tone={tone}>\n      <strong>{title}</strong>\n      <p>{message}</p>\n      {dismissible ? (\n        <button onClick={onDismiss} type=\"button\">\n          Dismiss\n        </button>\n      ) : null}\n    </section>\n  );\n}\n\n",
       "storyPath": "fixtures/alert/Alert.expected.stories.tsx",
-      "storySource": "import type { Meta, StoryObj } from '@storybook/react';\nimport { fn } from '@storybook/test';\n\nimport { Alert } from './Alert';\n\nconst meta = {\n  title: 'Fixtures/Alert',\n  component: Alert,\n  tags: ['autodocs'],\n  args: {\n    title: 'Deployment queued',\n    message: 'Your release will begin in a few minutes.',\n    tone: 'info',\n    onDismiss: fn(),\n  },\n  argTypes: {\n    tone: {\n      control: 'inline-radio',\n      options: ['info', 'success', 'danger'],\n    },\n    onDismiss: {\n      control: false,\n    },\n    className: {\n      control: false,\n      table: {\n        disable: true,\n      },\n    },\n  },\n} satisfies Meta<typeof Alert>;\n\nexport default meta;\ntype Story = StoryObj<typeof meta>;\n\nexport const Info: Story = {};\n\nexport const Success: Story = {\n  args: {\n    tone: 'success',\n    title: 'Deployment finished',\n    message: 'Everything shipped cleanly.',\n  },\n};\n\nexport const Danger: Story = {\n  args: {\n    tone: 'danger',\n    title: 'Deployment failed',\n    message: 'Rollback started automatically.',\n  },\n};\n\nexport const Dismissible: Story = {\n  args: {\n    dismissible: true,\n  },\n};\n\n",
+      "storySource": "import type { Meta, StoryObj } from '@storybook/react';\nimport { fn } from 'storybook/test';\n\nimport { Alert } from './Alert';\n\nconst meta = {\n  title: 'Fixtures/Alert',\n  component: Alert,\n  tags: ['autodocs'],\n  args: {\n    title: 'Deployment queued',\n    message: 'Your release will begin in a few minutes.',\n    tone: 'info',\n    onDismiss: fn(),\n  },\n  argTypes: {\n    tone: {\n      control: 'inline-radio',\n      options: ['info', 'success', 'danger'],\n    },\n    onDismiss: {\n      control: false,\n    },\n    className: {\n      control: false,\n      table: {\n        disable: true,\n      },\n    },\n  },\n} satisfies Meta<typeof Alert>;\n\nexport default meta;\ntype Story = StoryObj<typeof meta>;\n\nexport const Info: Story = {};\n\nexport const Success: Story = {\n  args: {\n    tone: 'success',\n    title: 'Deployment finished',\n    message: 'Everything shipped cleanly.',\n  },\n};\n\nexport const Danger: Story = {\n  args: {\n    tone: 'danger',\n    title: 'Deployment failed',\n    message: 'Rollback started automatically.',\n  },\n};\n\nexport const Dismissible: Story = {\n  args: {\n    dismissible: true,\n  },\n};\n",
       "metaArgs": {
         "title": "Deployment queued",
         "message": "Your release will begin in a few minutes.",
@@ -226,10 +381,12 @@
         "component": "Alert",
         "componentPath": "C:\\Users\\gamin\\storybook-codex\\fixtures\\alert\\Alert.tsx",
         "framework": "react",
+        "repoRoot": "C:\\Users\\gamin\\storybook-codex",
         "props": [
           {
             "name": "title",
             "type": "string",
+            "optional": false,
             "options": [],
             "isEvent": false,
             "isHidden": false
@@ -237,6 +394,7 @@
           {
             "name": "message",
             "type": "string",
+            "optional": false,
             "options": [],
             "isEvent": false,
             "isHidden": false
@@ -244,6 +402,7 @@
           {
             "name": "tone",
             "type": "'info' | 'success' | 'danger'",
+            "optional": true,
             "options": [
               "info",
               "success",
@@ -255,6 +414,7 @@
           {
             "name": "dismissible",
             "type": "boolean",
+            "optional": true,
             "options": [],
             "isEvent": false,
             "isHidden": false
@@ -262,6 +422,7 @@
           {
             "name": "onDismiss",
             "type": "() => void",
+            "optional": true,
             "options": [],
             "isEvent": true,
             "isHidden": false
@@ -269,6 +430,7 @@
           {
             "name": "className",
             "type": "string",
+            "optional": true,
             "options": [],
             "isEvent": false,
             "isHidden": true
@@ -277,7 +439,8 @@
         "defaultArgs": {
           "title": "Component title",
           "message": "Helpful supporting text.",
-          "tone": "info"
+          "tone": "info",
+          "dismissible": false
         },
         "controls": {
           "tone": {
@@ -309,10 +472,6 @@
             "lens": "decision"
           },
           {
-            "name": "Success",
-            "lens": "decision"
-          },
-          {
             "name": "Dismissible",
             "lens": "state"
           },
@@ -322,19 +481,86 @@
           }
         ],
         "notes": [
-          "Use fn() for event handlers and hide direct controls for them.",
+          "Use fn() from storybook/test for event handlers and hide direct controls for them.",
           "Hide internal props from docs tables and controls: className.",
-          "Prefer one or two decision stories over rendering every enum combination."
+          "Prefer one or two decision stories over rendering every enum combination.",
+          "Props that gate conditional branches deserve explicit state or boundary stories."
         ],
         "lenses": [
           "baseline",
           "decision",
           "state",
           "boundary",
-          "action"
-        ]
+          "action",
+          "a11y",
+          "visual"
+        ],
+        "usageSignals": {
+          "filesScanned": 28,
+          "matches": 0,
+          "props": [],
+          "cooccurrence": [],
+          "examples": []
+        },
+        "compositionStories": [],
+        "branchSignals": [
+          {
+            "prop": "dismissible",
+            "count": 1,
+            "reason": "state gate"
+          }
+        ],
+        "interactionStories": [
+          {
+            "storyName": "DismissFlow",
+            "handler": "onDismiss",
+            "steps": [
+              "activate the dismiss button with mouse and keyboard"
+            ],
+            "assertion": "assert the dismiss handler fires and focus remains sane",
+            "import": "storybook/test"
+          }
+        ],
+        "accessibilityStories": [
+          {
+            "storyName": "ScreenReaderSummary",
+            "focus": "Labeling and message announcement",
+            "wcag": [
+              "1.3.1",
+              "4.1.2"
+            ]
+          },
+          {
+            "storyName": "KeyboardDismiss",
+            "focus": "Keyboard-only activation and focus order",
+            "wcag": [
+              "2.1.1",
+              "2.4.3"
+            ]
+          }
+        ],
+        "visualDiff": {
+          "mode": "visual-regression-codex",
+          "harnesses": [
+            "Chromatic",
+            "Playwright screenshot test"
+          ],
+          "captureStories": [
+            "Default",
+            "Danger",
+            "Dismissible",
+            "LongContent"
+          ],
+          "interactionStories": [
+            "DismissFlow"
+          ],
+          "notes": [
+            "Capture the stable default story first, then branch states that change layout or density.",
+            "Keep local screenshot thresholds narrow when stories are token-aware or theme-aware."
+          ]
+        }
       },
-      "blueprintMarkdown": "# Alert blueprint\n\n_Framework_: react\n\n## Props\n- `title`: `string`\n- `message`: `string`\n- `tone`: `'info' | 'success' | 'danger'`\n- `dismissible`: `boolean`\n- `onDismiss`: `() => void` _(event)_\n- `className`: `string` _(hidden)_\n\n## Default args\n- `title`: \"Component title\"\n- `message`: \"Helpful supporting text.\"\n- `tone`: \"info\"\n\n## Controls\n- `tone`: {\"control\": \"inline-radio\", \"options\": [\"info\", \"success\", \"danger\"]}\n- `onDismiss`: {\"control\": false, \"useFn\": true}\n- `className`: {\"control\": false, \"table\": {\"disable\": true}}\n\n## Recommended stories\n- Default (baseline)\n- Danger (decision)\n- Success (decision)\n- Dismissible (state)\n- LongContent (boundary)\n\n## Notes\n- Use fn() for event handlers and hide direct controls for them.\n- Hide internal props from docs tables and controls: className.\n- Prefer one or two decision stories over rendering every enum combination."
+      "blueprintMarkdown": "# Alert blueprint\n\n_Framework_: react\n\n## Props\n- `title`: `string`\n- `message`: `string`\n- `tone`: `'info' | 'success' | 'danger'` _(optional)_\n- `dismissible`: `boolean` _(optional)_\n- `onDismiss`: `() => void` _(optional, event)_\n- `className`: `string` _(optional, hidden)_\n\n## Default args\n- `title`: \"Component title\"\n- `message`: \"Helpful supporting text.\"\n- `tone`: \"info\"\n- `dismissible`: false\n\n## Controls\n- `tone`: {\"control\": \"inline-radio\", \"options\": [\"info\", \"success\", \"danger\"]}\n- `onDismiss`: {\"control\": false, \"useFn\": true}\n- `className`: {\"control\": false, \"table\": {\"disable\": true}}\n\n## Recommended stories\n- Default (baseline)\n- Danger (decision)\n- Dismissible (state)\n- LongContent (boundary)\n\n## Branch signals\n- `dismissible`: state gate (1)\n\n## Interaction stories\n- DismissFlow: activate the dismiss button with mouse and keyboard -> assert the dismiss handler fires and focus remains sane\n\n## Accessibility stories\n- ScreenReaderSummary: Labeling and message announcement (WCAG 1.3.1, 4.1.2)\n- KeyboardDismiss: Keyboard-only activation and focus order (WCAG 2.1.1, 2.4.3)\n\n## Visual diff plan\n- Harnesses: Chromatic, Playwright screenshot test\n- Capture: Default, Danger, Dismissible, LongContent\n\n## Notes\n- Use fn() from storybook/test for event handlers and hide direct controls for them.\n- Hide internal props from docs tables and controls: className.\n- Prefer one or two decision stories over rendering every enum combination.\n- Props that gate conditional branches deserve explicit state or boundary stories."
     },
     {
       "name": "ThemeBadge",
@@ -381,10 +607,12 @@
         "component": "ThemeBadge",
         "componentPath": "C:\\Users\\gamin\\storybook-codex\\fixtures\\theme-badge\\ThemeBadge.tsx",
         "framework": "react",
+        "repoRoot": "C:\\Users\\gamin\\storybook-codex",
         "props": [
           {
             "name": "label",
             "type": "string",
+            "optional": false,
             "options": [],
             "isEvent": false,
             "isHidden": false
@@ -392,6 +620,7 @@
           {
             "name": "theme",
             "type": "'light' | 'dark' | 'system'",
+            "optional": true,
             "options": [
               "light",
               "dark",
@@ -403,6 +632,7 @@
           {
             "name": "selected",
             "type": "boolean",
+            "optional": true,
             "options": [],
             "isEvent": false,
             "isHidden": false
@@ -410,6 +640,7 @@
           {
             "name": "compact",
             "type": "boolean",
+            "optional": true,
             "options": [],
             "isEvent": false,
             "isHidden": false
@@ -417,6 +648,7 @@
           {
             "name": "className",
             "type": "string",
+            "optional": true,
             "options": [],
             "isEvent": false,
             "isHidden": true
@@ -424,7 +656,9 @@
         ],
         "defaultArgs": {
           "label": "Ready",
-          "theme": "light"
+          "theme": "system",
+          "selected": false,
+          "compact": false
         },
         "controls": {
           "theme": {
@@ -470,17 +704,170 @@
         ],
         "notes": [
           "Hide internal props from docs tables and controls: className.",
-          "Prefer one or two decision stories over rendering every enum combination."
+          "Prefer one or two decision stories over rendering every enum combination.",
+          "Bias stories toward prop combinations already used together in the app.",
+          "Add at least one parent-context story so the component is reviewed where it actually ships."
         ],
         "lenses": [
           "baseline",
           "decision",
           "state",
           "boundary",
-          "action"
-        ]
+          "action",
+          "a11y",
+          "visual"
+        ],
+        "usageSignals": {
+          "filesScanned": 28,
+          "matches": 3,
+          "props": [
+            {
+              "prop": "label",
+              "count": 3
+            },
+            {
+              "prop": "theme",
+              "count": 3
+            },
+            {
+              "prop": "selected",
+              "count": 2
+            },
+            {
+              "prop": "compact",
+              "count": 1
+            }
+          ],
+          "cooccurrence": [
+            {
+              "pair": "label + theme",
+              "count": 3
+            },
+            {
+              "pair": "label + selected",
+              "count": 2
+            },
+            {
+              "pair": "selected + theme",
+              "count": 2
+            },
+            {
+              "pair": "compact + label",
+              "count": 1
+            },
+            {
+              "pair": "compact + selected",
+              "count": 1
+            }
+          ],
+          "examples": [
+            {
+              "file": "fixtures/theme-badge/ThemeBadgeUsage.tsx",
+              "props": [
+                "label",
+                "theme"
+              ]
+            },
+            {
+              "file": "fixtures/theme-badge/ThemeBadgeUsage.tsx",
+              "props": [
+                "label",
+                "selected",
+                "theme"
+              ]
+            },
+            {
+              "file": "fixtures/theme-badge/ThemeBadgeUsage.tsx",
+              "props": [
+                "compact",
+                "label",
+                "selected",
+                "theme"
+              ]
+            }
+          ]
+        },
+        "compositionStories": [
+          {
+            "storyName": "InThemeBadgeUsage",
+            "parentComponent": "ThemeBadgeUsage",
+            "parentFile": "fixtures/theme-badge/ThemeBadgeUsage.tsx",
+            "layout": "inline parent context",
+            "args": {
+              "label": "System",
+              "theme": "system"
+            },
+            "bindings": {},
+            "siblingComponents": [],
+            "wrappers": [],
+            "confidence": 70
+          },
+          {
+            "storyName": "InThemeBadgeUsageThemeBadgeUsage",
+            "parentComponent": "ThemeBadgeUsage",
+            "parentFile": "fixtures/theme-badge/ThemeBadgeUsage.tsx",
+            "layout": "inline parent context",
+            "args": {
+              "label": "Light",
+              "selected": true,
+              "theme": "light"
+            },
+            "bindings": {},
+            "siblingComponents": [],
+            "wrappers": [],
+            "confidence": 70
+          },
+          {
+            "storyName": "InThemeBadgeUsageThemeBadgeUsage",
+            "parentComponent": "ThemeBadgeUsage",
+            "parentFile": "fixtures/theme-badge/ThemeBadgeUsage.tsx",
+            "layout": "inline parent context",
+            "args": {
+              "compact": true,
+              "label": "Dark",
+              "selected": true,
+              "theme": "dark"
+            },
+            "bindings": {},
+            "siblingComponents": [],
+            "wrappers": [],
+            "confidence": 70
+          }
+        ],
+        "branchSignals": [],
+        "interactionStories": [],
+        "accessibilityStories": [
+          {
+            "storyName": "FieldNarration",
+            "focus": "Visible labels and described-by relationships",
+            "wcag": [
+              "1.3.1",
+              "3.3.1"
+            ]
+          }
+        ],
+        "visualDiff": {
+          "mode": "visual-regression-codex",
+          "harnesses": [
+            "Chromatic",
+            "Playwright screenshot test"
+          ],
+          "captureStories": [
+            "Default",
+            "Dark",
+            "Light",
+            "Selected",
+            "Compact",
+            "LongContent"
+          ],
+          "interactionStories": [],
+          "notes": [
+            "Capture the stable default story first, then branch states that change layout or density.",
+            "Keep local screenshot thresholds narrow when stories are token-aware or theme-aware."
+          ]
+        }
       },
-      "blueprintMarkdown": "# ThemeBadge blueprint\n\n_Framework_: react\n\n## Props\n- `label`: `string`\n- `theme`: `'light' | 'dark' | 'system'`\n- `selected`: `boolean`\n- `compact`: `boolean`\n- `className`: `string` _(hidden)_\n\n## Default args\n- `label`: \"Ready\"\n- `theme`: \"light\"\n\n## Controls\n- `theme`: {\"control\": \"inline-radio\", \"options\": [\"light\", \"dark\", \"system\"]}\n- `className`: {\"control\": false, \"table\": {\"disable\": true}}\n\n## Recommended stories\n- Default (baseline)\n- Dark (decision)\n- Light (decision)\n- Selected (state)\n- Compact (state)\n- LongContent (boundary)\n\n## Notes\n- Hide internal props from docs tables and controls: className.\n- Prefer one or two decision stories over rendering every enum combination."
+      "blueprintMarkdown": "# ThemeBadge blueprint\n\n_Framework_: react\n\n## Props\n- `label`: `string`\n- `theme`: `'light' | 'dark' | 'system'` _(optional)_\n- `selected`: `boolean` _(optional)_\n- `compact`: `boolean` _(optional)_\n- `className`: `string` _(optional, hidden)_\n\n## Default args\n- `label`: \"Ready\"\n- `theme`: \"system\"\n- `selected`: false\n- `compact`: false\n\n## Controls\n- `theme`: {\"control\": \"inline-radio\", \"options\": [\"light\", \"dark\", \"system\"]}\n- `className`: {\"control\": false, \"table\": {\"disable\": true}}\n\n## Recommended stories\n- Default (baseline)\n- Dark (decision)\n- Light (decision)\n- Selected (state)\n- Compact (state)\n- LongContent (boundary)\n\n## Usage signals\n- Matches found: 3 across 28 scanned files\n- `label` appears in 3 usage sites\n- `theme` appears in 3 usage sites\n- `selected` appears in 2 usage sites\n- `compact` appears in 1 usage sites\n- Co-occurs: `label + theme` (3)\n- Co-occurs: `label + selected` (2)\n- Co-occurs: `selected + theme` (2)\n\n## Composition stories\n- InThemeBadgeUsage: inline parent context; fixtures/theme-badge/ThemeBadgeUsage.tsx; label=\"System\", theme=\"system\"\n- InThemeBadgeUsageThemeBadgeUsage: inline parent context; fixtures/theme-badge/ThemeBadgeUsage.tsx; label=\"Light\", selected=true, theme=\"light\"\n- InThemeBadgeUsageThemeBadgeUsage: inline parent context; fixtures/theme-badge/ThemeBadgeUsage.tsx; compact=true, label=\"Dark\", selected=true, theme=\"dark\"\n\n## Accessibility stories\n- FieldNarration: Visible labels and described-by relationships (WCAG 1.3.1, 3.3.1)\n\n## Visual diff plan\n- Harnesses: Chromatic, Playwright screenshot test\n- Capture: Default, Dark, Light, Selected, Compact, LongContent\n\n## Notes\n- Hide internal props from docs tables and controls: className.\n- Prefer one or two decision stories over rendering every enum combination.\n- Bias stories toward prop combinations already used together in the app.\n- Add at least one parent-context story so the component is reviewed where it actually ships."
     },
     {
       "name": "Badge",
@@ -517,10 +904,12 @@
         "component": "Badge",
         "componentPath": "C:\\Users\\gamin\\storybook-codex\\fixtures\\existing-story\\Badge.tsx",
         "framework": "react",
+        "repoRoot": "C:\\Users\\gamin\\storybook-codex",
         "props": [
           {
             "name": "label",
             "type": "string",
+            "optional": false,
             "options": [],
             "isEvent": false,
             "isHidden": false
@@ -528,6 +917,7 @@
           {
             "name": "variant",
             "type": "'soft' | 'solid'",
+            "optional": true,
             "options": [
               "soft",
               "solid"
@@ -538,6 +928,7 @@
           {
             "name": "rounded",
             "type": "boolean",
+            "optional": true,
             "options": [],
             "isEvent": false,
             "isHidden": false
@@ -545,7 +936,8 @@
         ],
         "defaultArgs": {
           "label": "Ready",
-          "variant": "soft"
+          "variant": "soft",
+          "rounded": true
         },
         "controls": {
           "variant": {
@@ -578,10 +970,49 @@
           "decision",
           "state",
           "boundary",
-          "action"
-        ]
+          "action",
+          "a11y",
+          "visual"
+        ],
+        "usageSignals": {
+          "filesScanned": 28,
+          "matches": 0,
+          "props": [],
+          "cooccurrence": [],
+          "examples": []
+        },
+        "compositionStories": [],
+        "branchSignals": [],
+        "interactionStories": [],
+        "accessibilityStories": [
+          {
+            "storyName": "FieldNarration",
+            "focus": "Visible labels and described-by relationships",
+            "wcag": [
+              "1.3.1",
+              "3.3.1"
+            ]
+          }
+        ],
+        "visualDiff": {
+          "mode": "visual-regression-codex",
+          "harnesses": [
+            "Chromatic",
+            "Playwright screenshot test"
+          ],
+          "captureStories": [
+            "Default",
+            "Solid",
+            "LongContent"
+          ],
+          "interactionStories": [],
+          "notes": [
+            "Capture the stable default story first, then branch states that change layout or density.",
+            "Keep local screenshot thresholds narrow when stories are token-aware or theme-aware."
+          ]
+        }
       },
-      "blueprintMarkdown": "# Badge blueprint\n\n_Framework_: react\n\n## Props\n- `label`: `string`\n- `variant`: `'soft' | 'solid'`\n- `rounded`: `boolean`\n\n## Default args\n- `label`: \"Ready\"\n- `variant`: \"soft\"\n\n## Controls\n- `variant`: {\"control\": \"inline-radio\", \"options\": [\"soft\", \"solid\"]}\n\n## Recommended stories\n- Default (baseline)\n- Solid (decision)\n- LongContent (boundary)\n\n## Notes\n- Prefer one or two decision stories over rendering every enum combination."
+      "blueprintMarkdown": "# Badge blueprint\n\n_Framework_: react\n\n## Props\n- `label`: `string`\n- `variant`: `'soft' | 'solid'` _(optional)_\n- `rounded`: `boolean` _(optional)_\n\n## Default args\n- `label`: \"Ready\"\n- `variant`: \"soft\"\n- `rounded`: true\n\n## Controls\n- `variant`: {\"control\": \"inline-radio\", \"options\": [\"soft\", \"solid\"]}\n\n## Recommended stories\n- Default (baseline)\n- Solid (decision)\n- LongContent (boundary)\n\n## Accessibility stories\n- FieldNarration: Visible labels and described-by relationships (WCAG 1.3.1, 3.3.1)\n\n## Visual diff plan\n- Harnesses: Chromatic, Playwright screenshot test\n- Capture: Default, Solid, LongContent\n\n## Notes\n- Prefer one or two decision stories over rendering every enum combination."
     },
     {
       "name": "InfoPanel",
@@ -625,10 +1056,12 @@
         "component": "InfoPanel",
         "componentPath": "C:\\Users\\gamin\\storybook-codex\\fixtures\\vue-info-panel\\InfoPanel.vue",
         "framework": "vue",
+        "repoRoot": "C:\\Users\\gamin\\storybook-codex",
         "props": [
           {
             "name": "title",
             "type": "string",
+            "optional": false,
             "options": [],
             "isEvent": false,
             "isHidden": false
@@ -636,6 +1069,7 @@
           {
             "name": "tone",
             "type": "'info' | 'success' | 'danger'",
+            "optional": true,
             "options": [
               "info",
               "success",
@@ -647,6 +1081,7 @@
           {
             "name": "compact",
             "type": "boolean",
+            "optional": true,
             "options": [],
             "isEvent": false,
             "isHidden": false
@@ -654,6 +1089,7 @@
           {
             "name": "className",
             "type": "string",
+            "optional": true,
             "options": [],
             "isEvent": false,
             "isHidden": true
@@ -661,7 +1097,8 @@
         ],
         "defaultArgs": {
           "title": "Component title",
-          "tone": "info"
+          "tone": "info",
+          "compact": false
         },
         "controls": {
           "tone": {
@@ -689,10 +1126,6 @@
             "lens": "decision"
           },
           {
-            "name": "Success",
-            "lens": "decision"
-          },
-          {
             "name": "Compact",
             "lens": "state"
           },
@@ -710,10 +1143,50 @@
           "decision",
           "state",
           "boundary",
-          "action"
-        ]
+          "action",
+          "a11y",
+          "visual"
+        ],
+        "usageSignals": {
+          "filesScanned": 28,
+          "matches": 0,
+          "props": [],
+          "cooccurrence": [],
+          "examples": []
+        },
+        "compositionStories": [],
+        "branchSignals": [],
+        "interactionStories": [],
+        "accessibilityStories": [
+          {
+            "storyName": "ScreenReaderSummary",
+            "focus": "Labeling and message announcement",
+            "wcag": [
+              "1.3.1",
+              "4.1.2"
+            ]
+          }
+        ],
+        "visualDiff": {
+          "mode": "visual-regression-codex",
+          "harnesses": [
+            "Chromatic",
+            "Playwright screenshot test"
+          ],
+          "captureStories": [
+            "Default",
+            "Danger",
+            "Compact",
+            "LongContent"
+          ],
+          "interactionStories": [],
+          "notes": [
+            "Capture the stable default story first, then branch states that change layout or density.",
+            "Keep local screenshot thresholds narrow when stories are token-aware or theme-aware."
+          ]
+        }
       },
-      "blueprintMarkdown": "# InfoPanel blueprint\n\n_Framework_: vue\n\n## Props\n- `title`: `string`\n- `tone`: `'info' | 'success' | 'danger'`\n- `compact`: `boolean`\n- `className`: `string` _(hidden)_\n\n## Default args\n- `title`: \"Component title\"\n- `tone`: \"info\"\n\n## Controls\n- `tone`: {\"control\": \"inline-radio\", \"options\": [\"info\", \"success\", \"danger\"]}\n- `className`: {\"control\": false, \"table\": {\"disable\": true}}\n\n## Recommended stories\n- Default (baseline)\n- Danger (decision)\n- Success (decision)\n- Compact (state)\n- LongContent (boundary)\n\n## Notes\n- Hide internal props from docs tables and controls: className.\n- Prefer one or two decision stories over rendering every enum combination."
+      "blueprintMarkdown": "# InfoPanel blueprint\n\n_Framework_: vue\n\n## Props\n- `title`: `string`\n- `tone`: `'info' | 'success' | 'danger'` _(optional)_\n- `compact`: `boolean` _(optional)_\n- `className`: `string` _(optional, hidden)_\n\n## Default args\n- `title`: \"Component title\"\n- `tone`: \"info\"\n- `compact`: false\n\n## Controls\n- `tone`: {\"control\": \"inline-radio\", \"options\": [\"info\", \"success\", \"danger\"]}\n- `className`: {\"control\": false, \"table\": {\"disable\": true}}\n\n## Recommended stories\n- Default (baseline)\n- Danger (decision)\n- Compact (state)\n- LongContent (boundary)\n\n## Accessibility stories\n- ScreenReaderSummary: Labeling and message announcement (WCAG 1.3.1, 4.1.2)\n\n## Visual diff plan\n- Harnesses: Chromatic, Playwright screenshot test\n- Capture: Default, Danger, Compact, LongContent\n\n## Notes\n- Hide internal props from docs tables and controls: className.\n- Prefer one or two decision stories over rendering every enum combination."
     },
     {
       "name": "StatusPill",
@@ -764,10 +1237,12 @@
         "component": "StatusPill",
         "componentPath": "C:\\Users\\gamin\\storybook-codex\\fixtures\\svelte-status-pill\\StatusPill.svelte",
         "framework": "svelte",
+        "repoRoot": "C:\\Users\\gamin\\storybook-codex",
         "props": [
           {
             "name": "label",
             "type": "string",
+            "optional": false,
             "options": [],
             "isEvent": false,
             "isHidden": false
@@ -775,6 +1250,7 @@
           {
             "name": "tone",
             "type": "'neutral' | 'brand' | 'danger'",
+            "optional": true,
             "options": [
               "neutral",
               "brand",
@@ -786,6 +1262,7 @@
           {
             "name": "selected",
             "type": "boolean",
+            "optional": true,
             "options": [],
             "isEvent": false,
             "isHidden": false
@@ -793,6 +1270,7 @@
           {
             "name": "compact",
             "type": "boolean",
+            "optional": true,
             "options": [],
             "isEvent": false,
             "isHidden": false
@@ -800,7 +1278,9 @@
         ],
         "defaultArgs": {
           "label": "Ready",
-          "tone": "neutral"
+          "tone": "neutral",
+          "selected": false,
+          "compact": false
         },
         "controls": {
           "tone": {
@@ -819,10 +1299,6 @@
           },
           {
             "name": "Brand",
-            "lens": "decision"
-          },
-          {
-            "name": "Danger",
             "lens": "decision"
           },
           {
@@ -846,10 +1322,51 @@
           "decision",
           "state",
           "boundary",
-          "action"
-        ]
+          "action",
+          "a11y",
+          "visual"
+        ],
+        "usageSignals": {
+          "filesScanned": 28,
+          "matches": 0,
+          "props": [],
+          "cooccurrence": [],
+          "examples": []
+        },
+        "compositionStories": [],
+        "branchSignals": [],
+        "interactionStories": [],
+        "accessibilityStories": [
+          {
+            "storyName": "FieldNarration",
+            "focus": "Visible labels and described-by relationships",
+            "wcag": [
+              "1.3.1",
+              "3.3.1"
+            ]
+          }
+        ],
+        "visualDiff": {
+          "mode": "visual-regression-codex",
+          "harnesses": [
+            "Chromatic",
+            "Playwright screenshot test"
+          ],
+          "captureStories": [
+            "Default",
+            "Brand",
+            "Selected",
+            "Compact",
+            "LongContent"
+          ],
+          "interactionStories": [],
+          "notes": [
+            "Capture the stable default story first, then branch states that change layout or density.",
+            "Keep local screenshot thresholds narrow when stories are token-aware or theme-aware."
+          ]
+        }
       },
-      "blueprintMarkdown": "# StatusPill blueprint\n\n_Framework_: svelte\n\n## Props\n- `label`: `string`\n- `tone`: `'neutral' | 'brand' | 'danger'`\n- `selected`: `boolean`\n- `compact`: `boolean`\n\n## Default args\n- `label`: \"Ready\"\n- `tone`: \"neutral\"\n\n## Controls\n- `tone`: {\"control\": \"inline-radio\", \"options\": [\"neutral\", \"brand\", \"danger\"]}\n\n## Recommended stories\n- Default (baseline)\n- Brand (decision)\n- Danger (decision)\n- Selected (state)\n- Compact (state)\n- LongContent (boundary)\n\n## Notes\n- Prefer one or two decision stories over rendering every enum combination."
+      "blueprintMarkdown": "# StatusPill blueprint\n\n_Framework_: svelte\n\n## Props\n- `label`: `string`\n- `tone`: `'neutral' | 'brand' | 'danger'` _(optional)_\n- `selected`: `boolean` _(optional)_\n- `compact`: `boolean` _(optional)_\n\n## Default args\n- `label`: \"Ready\"\n- `tone`: \"neutral\"\n- `selected`: false\n- `compact`: false\n\n## Controls\n- `tone`: {\"control\": \"inline-radio\", \"options\": [\"neutral\", \"brand\", \"danger\"]}\n\n## Recommended stories\n- Default (baseline)\n- Brand (decision)\n- Selected (state)\n- Compact (state)\n- LongContent (boundary)\n\n## Accessibility stories\n- FieldNarration: Visible labels and described-by relationships (WCAG 1.3.1, 3.3.1)\n\n## Visual diff plan\n- Harnesses: Chromatic, Playwright screenshot test\n- Capture: Default, Brand, Selected, Compact, LongContent\n\n## Notes\n- Prefer one or two decision stories over rendering every enum combination."
     }
   ]
 }

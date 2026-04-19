@@ -126,6 +126,8 @@ export const renderers = {
       compact: false,
       slot: 'Helpful supporting detail.',
     });
+    // Matches fixtures/vue-info-panel/InfoPanel.vue: <strong>{{title}}</strong>
+    // followed directly by <slot>...</slot>, no wrapping element.
     return el(
       'section',
       {
@@ -133,10 +135,7 @@ export const renderers = {
         'data-compact': String(Boolean(a.compact)),
         class: 'sb-info-panel',
       },
-      [
-        el('strong', { class: 'sb-info-panel__title' }, a.title),
-        el('p', { class: 'sb-info-panel__body' }, a.slot),
-      ],
+      [el('strong', { class: 'sb-info-panel__title' }, a.title), document.createTextNode(a.slot)],
     );
   },
 
