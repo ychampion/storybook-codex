@@ -1,6 +1,8 @@
 # Storybook Codex
 
-`storybook-codex` is a plugin-ready Codex package for Storybook work that goes well beyond "write a `.stories.tsx` file."
+`storybook-codex` is a plugin-ready Codex package for Storybook work.
+
+A Storybook Codex is a focused Codex skill that understands Storybook workflows and helps teams generate, update, document, and review component stories across a repo instead of only writing a single `.stories.tsx` file.
 
 It gives Codex one focused skill that can:
 
