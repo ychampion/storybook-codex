@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title>Storybook Codex icon</title>
+  <rect width="128" height="128" rx="28" fill="#FFF4EE"/>
+  <path d="M30 26h44c13 0 24 11 24 24v44H54c-13 0-24-11-24-24V26Z" fill="#F05A28"/>
+  <path d="M54 94h44V50c0-13-11-24-24-24H54v68Z" fill="#111827" opacity=".12"/>
+  <path d="M44 40h30M44 56h38M44 72h26" stroke="#FFF4EE" stroke-linecap="round" stroke-width="8"/>
+  <path d="m95 27 3.7 8.3L107 39l-8.3 3.7L95 51l-3.7-8.3L83 39l8.3-3.7L95 27Z" fill="#111827"/>
+</svg>
+

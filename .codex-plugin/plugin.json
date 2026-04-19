@@ -1,0 +1,41 @@
+{
+  "name": "storybook-codex",
+  "version": "0.1.0",
+  "description": "Plugin-ready Codex skill for creating and updating React Storybook stories with controls, autodocs, and optional Chromatic scaffolding.",
+  "author": {
+    "name": "YChampion",
+    "url": "https://github.com/ychampion"
+  },
+  "homepage": "https://github.com/ychampion/storybook-codex",
+  "repository": "https://github.com/ychampion/storybook-codex",
+  "license": "MIT",
+  "keywords": [
+    "codex",
+    "storybook",
+    "react",
+    "chromatic",
+    "skill"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Storybook Codex",
+    "shortDescription": "Generate React Storybook stories with controls and autodocs.",
+    "longDescription": "A focused Codex skill for creating and updating React Storybook stories using modern object stories, selective controls, autodocs tags, and optional Chromatic setup.",
+    "developerName": "YChampion",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/ychampion/storybook-codex",
+    "defaultPrompt": [
+      "Use $storybook-codex to create stories for src/components/Button.tsx.",
+      "Use $storybook-codex to update existing stories to StoryObj and autodocs.",
+      "Use $storybook-codex to scaffold Chromatic for this Storybook project."
+    ],
+    "brandColor": "#F05A28",
+    "composerIcon": "./skills/storybook-codex/assets/storybook-codex-small.svg",
+    "logo": "./skills/storybook-codex/assets/storybook-codex-logo.svg"
+  }
+}

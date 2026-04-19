@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 180" role="img" aria-labelledby="title">
+  <title>Storybook Codex logo</title>
+  <rect width="480" height="180" rx="36" fill="#FFF8F4"/>
+  <rect x="28" y="26" width="128" height="128" rx="28" fill="#F05A28"/>
+  <path d="M57 53h58M57 78h72M57 103h48" stroke="#FFF8F4" stroke-linecap="round" stroke-width="12"/>
+  <path d="m140 42 5.6 12.4L158 60l-12.4 5.6L140 78l-5.6-12.4L122 60l12.4-5.6L140 42Z" fill="#111827"/>
+  <g fill="#111827">
+    <path d="M197 66h45c23 0 35 9 35 25 0 10-5 18-14 22 12 4 18 13 18 27 0 22-17 34-46 34h-38V66Zm21 18v22h24c9 0 14-4 14-11 0-7-5-11-14-11h-24Zm0 39v24h27c10 0 15-4 15-12 0-8-5-12-15-12h-27Z"/>
+    <path d="M309 66h23l40 108h-22l-9-25h-42l-9 25h-22l41-108Zm26 65-15-42-15 42h30Z"/>
+    <path d="M389 66h21v90h42v18h-63V66Z"/>
+  </g>
+</svg>

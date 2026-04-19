@@ -1,0 +1,81 @@
+{
+  "stories": [
+    {
+      "name": "basic-button",
+      "story": "fixtures/basic-button/Button.expected.stories.tsx",
+      "requiredStories": ["Default", "Brand", "Disabled", "Loading", "Large"],
+      "requiredMarkers": [
+        "tags: ['autodocs']",
+        "control: 'radio'",
+        "control: 'inline-radio'",
+        "onClick: fn()"
+      ]
+    },
+    {
+      "name": "alert",
+      "story": "fixtures/alert/Alert.expected.stories.tsx",
+      "requiredStories": ["Info", "Success", "Danger", "Dismissible"],
+      "requiredMarkers": [
+        "tags: ['autodocs']",
+        "control: 'inline-radio'",
+        "table: {",
+        "onDismiss: fn()"
+      ]
+    },
+    {
+      "name": "theme-badge",
+      "story": "fixtures/theme-badge/ThemeBadge.expected.stories.tsx",
+      "requiredStories": ["System", "Light", "Dark", "Selected", "Compact"],
+      "requiredMarkers": [
+        "tags: ['autodocs']",
+        "control: 'select'",
+        "table: {"
+      ]
+    },
+    {
+      "name": "existing-story-migration",
+      "story": "fixtures/existing-story/Badge.expected.stories.tsx",
+      "requiredStories": ["Default", "Solid", "RoundedOff"],
+      "requiredMarkers": [
+        "title: 'Legacy/Badge'",
+        "tags: ['autodocs']",
+        "control: 'inline-radio'"
+      ]
+    }
+  ],
+  "templates": [
+    {
+      "name": "component-template",
+      "story": "skills/storybook-codex/assets/templates/component.stories.tsx",
+      "allowPlaceholders": true,
+      "requiredStories": ["Default", "Disabled"],
+      "requiredMarkers": [
+        "__COMPONENT_NAME__",
+        "__COMPONENT_IMPORT_PATH__",
+        "tags: ['autodocs']"
+      ]
+    }
+  ],
+  "blueprints": [
+    {
+      "name": "button-blueprint",
+      "component": "fixtures/basic-button/Button.tsx",
+      "expectedStories": ["Default", "Brand", "Disabled", "Loading", "LongContent"],
+      "expectedNotes": [
+        "Use fn() for event handlers",
+        "Prefer one or two decision stories"
+      ],
+      "expectedHiddenProps": []
+    },
+    {
+      "name": "alert-blueprint",
+      "component": "fixtures/alert/Alert.tsx",
+      "expectedStories": ["Default", "Success", "Danger", "Dismissible", "LongContent"],
+      "expectedNotes": [
+        "Use fn() for event handlers",
+        "Hide internal props from docs tables and controls: className."
+      ],
+      "expectedHiddenProps": ["className"]
+    }
+  ]
+}
